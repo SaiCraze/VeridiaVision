@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Veridia Vision</title>
+    <script src="https://cdn.jsdelivr.net/npm/inferencejs"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Exo 2', sans-serif; background: radial-gradient(circle at center, #0d1b2a, #1b263b, #415a77); height: 100vh; display: flex; flex-direction: column; justify-content: space-between; align-items: center; color: #e0e1dd; overflow: hidden; position: relative; }
@@ -34,7 +35,6 @@
         .popup button { margin-top: 20px; padding: 10px 30px; background: linear-gradient(45deg, #00ffcc, #ff00ff); border: none; border-radius: 25px; color: #000; font-family: 'Quantico', sans-serif; font-weight: bold; cursor: pointer; transition: all 0.3s ease; }
         .popup button:hover { transform: scale(1.1); box-shadow: 0 0 20px #ff00ff; }
     </style>
-    <link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Exo+2:wght@400;700&family=Quantico:wght@400;700&family=Rajdhani:wght@500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 </head>
 <body>
     <button class="header-btn" onclick="location.reload()">Veridia Vision v0</button>
@@ -70,9 +70,10 @@
         let timeLeft = 30;
         let timer;
         let stream;
+        let workerId;
 
-        const apiKey = 'QwvU8KggNRnTD41izoC6'; // Replace with your Roboflow API key
-        const modelId = 'veridiavision/1'; // Replace with your Roboflow Model ID (e.g., "veridiavision/1")
+        const { InferenceEngine, CVImage } = inferencejs;
+        const inferEngine = new InferenceEngine();
         const classNames = ["recyclable", "non-recyclable", "organic", "human", "hand"];
 
         startButton.addEventListener('click', async () => {
@@ -85,11 +86,19 @@
                 stream = await navigator.mediaDevices.getUserMedia({ video: true });
                 videoFeed.srcObject = stream;
                 startTimer();
+
+                // Load the model
+                workerId = await inferEngine.startWorker(
+                    "veridian-vision", // Project name
+                    "1",              // Version
+                    "rf_yNtQBnhOeVN53ym5V37LZxhztga2" // Your Roboflow API key
+                );
+                console.log('Model loaded with worker ID:', workerId);
                 detectObjects();
             } catch (e) {
-                console.error('Error accessing webcam:', e);
+                console.error('Error starting webcam or model:', e);
                 videoFeed.style.display = 'none';
-                alert('Failed to access webcam. Please allow permissions.');
+                alert('Failed to start. Check console for details.');
                 stopButton.click();
             }
         });
@@ -107,6 +116,10 @@
             timerDisplay.textContent = '';
             warningPopup.style.display = 'none';
             timeLeft = 30;
+            if (workerId) {
+                inferEngine.stopWorker(workerId);
+                console.log('Worker stopped');
+            }
         });
 
         function startTimer() {
@@ -131,27 +144,20 @@
             canvas.height = videoFeed.videoHeight;
 
             async function runDetection() {
-                if (!stream || timeLeft <= 0) return;
+                if (!stream || timeLeft <= 0 || !workerId) return;
 
                 ctx.drawImage(videoFeed, 0, 0, canvas.width, canvas.height);
-                const imageData = canvas.toDataURL('image/jpeg');
+                const image = new CVImage(videoFeed);
 
                 try {
-                    const response = await fetch(`https://detect.roboflow.com/${modelId}`, {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${apiKey}`,
-                            'Content-Type': 'application/x-www-form-urlencoded'
-                        },
-                        body: `image=${encodeURIComponent(imageData)}`
-                    });
-                    const result = await response.json();
-                    drawDetections(result.predictions, ctx);
+                    const predictions = await inferEngine.infer(workerId, image);
+                    console.log('Predictions:', predictions);
+                    drawDetections(predictions, ctx);
                 } catch (e) {
                     console.error('Error during inference:', e);
                 }
 
-                setTimeout(runDetection, 500); // 2 FPS to reduce load
+                requestAnimationFrame(runDetection); // Continuous inference
             }
 
             canvas.style.display = 'block';
@@ -168,7 +174,7 @@
                 const { x, y, width, height, confidence, class: cls } = det;
                 if (confidence > 0.5) {
                     ctx.strokeRect(x - width / 2, y - height / 2, width, height);
-                    const className = classNames[cls] || cls; // Map numeric class to name
+                    const className = classNames[cls] || cls;
                     ctx.fillText(`${className} (${(confidence * 100).toFixed(1)}%)`, x - width / 2, y - height / 2 - 5);
                 }
             });
