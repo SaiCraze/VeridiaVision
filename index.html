@@ -87,13 +87,13 @@
                 videoFeed.srcObject = stream;
                 startTimer();
 
-                // Load the model
+                console.log('Starting worker...');
                 workerId = await inferEngine.startWorker(
-                    "veridian-vision", // Project name
-                    "1",              // Version
-                    "rf_yNtQBnhOeVN53ym5V37LZxhztga2" // Your Roboflow API key
+                    "veridian-vision", // Ensure this matches your Roboflow project name
+                    "1",              // Version number
+                    "QwvU8KggNRnTD41izoC6" // Your Roboflow API key
                 );
-                console.log('Model loaded with worker ID:', workerId);
+                console.log('Worker started successfully with ID:', workerId);
                 detectObjects();
             } catch (e) {
                 console.error('Error starting webcam or model:', e);
@@ -152,12 +152,12 @@
                 try {
                     const predictions = await inferEngine.infer(workerId, image);
                     console.log('Predictions:', predictions);
-                    drawDetections(predictions, ctx);
+                    drawDetections(predictions || [], ctx);
                 } catch (e) {
                     console.error('Error during inference:', e);
                 }
 
-                requestAnimationFrame(runDetection); // Continuous inference
+                setTimeout(runDetection, 500); // 2 FPS for stability
             }
 
             canvas.style.display = 'block';
@@ -165,10 +165,16 @@
         }
 
         function drawDetections(predictions, ctx) {
+            console.log('Drawing predictions:', predictions);
             ctx.strokeStyle = '#00ffcc';
             ctx.lineWidth = 2;
             ctx.font = '16px Quantico';
             ctx.fillStyle = '#00ffcc';
+
+            if (!predictions || !Array.isArray(predictions)) {
+                console.warn('No valid predictions received');
+                return;
+            }
 
             predictions.forEach(det => {
                 const { x, y, width, height, confidence, class: cls } = det;
