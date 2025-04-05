@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Veridia Vision - Smart Recycling</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>♻️</text></svg>">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@400;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0" rel="stylesheet">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body class="modern-page">
+    <!-- Navigation -->
+    <nav class="main-nav">
+        <div class="nav-container">
+            <div class="logo-container">
+                <span class="logo-icon">
+                    <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M13 2C10.4288 2 7.9154 2.76244 5.77759 4.1909C3.63978 5.61935 1.97351 7.64968 0.991826 10.0251C0.0101517 12.4006 -0.252401 15.0144 0.250707 17.5362C0.753815 20.0579 1.98979 22.3743 3.80762 24.1921C5.62545 26.01 7.94189 27.2459 10.4636 27.749C12.9854 28.2521 15.5992 27.9895 17.9747 27.0078C20.3502 26.0262 22.3805 24.3599 23.809 22.2221C25.2374 20.0843 25.9999 17.5709 25.9999 14.9997C25.9999 11.4869 24.5777 8.10073 22.0498 5.57285C19.5219 3.04497 16.1357 1.62275 12.6229 1.62275L13 2Z" fill="#00DC82"/>
+                        <path d="M16.6183 7.72656C16.9121 7.72656 17.193 7.84102 17.4018 8.04988C17.6107 8.25873 17.7251 8.53962 17.7251 8.83344V11.0472C18.8078 11.2852 19.787 11.8768 20.5051 12.7328C21.2232 13.5888 21.6341 14.6612 21.6736 15.78C21.713 16.8988 21.3786 18.0004 20.7207 18.9107C20.0627 19.8211 19.1207 20.487 18.0566 20.7978C16.9924 21.1086 15.8558 21.0442 14.8335 20.6148C13.8113 20.1855 12.9638 19.4167 12.4369 18.4371C11.91 17.4575 11.7326 16.327 11.9343 15.2329C12.136 14.1388 12.7051 13.1462 13.5487 12.4145C13.6158 12.3533 13.6971 12.3086 13.7861 12.2848C13.875 12.2611 13.9686 12.2591 14.0584 12.279C14.1482 12.2989 14.2313 12.3401 14.3007 12.3985C14.3701 12.4569 14.4237 12.5307 14.4565 12.6135C14.4893 12.6963 14.5 12.7853 14.488 12.8724C14.4759 12.9594 14.4415 13.0416 14.3878 13.1116C14.334 13.1815 14.2627 13.2371 14.1801 13.2731C14.0975 13.3091 14.0064 13.3245 13.9164 13.318C13.1855 13.897 12.6909 14.7381 12.543 15.6746C12.3951 16.6111 12.6049 17.5705 13.1318 18.3577C13.6586 19.1449 14.4653 19.7056 15.3871 19.9356C16.3089 20.1656 17.2845 20.0478 18.1183 19.6051C18.9521 19.1624 19.5871 18.4291 19.9105 17.5407C20.2339 16.6523 20.2211 15.6743 19.8745 14.7947C19.5279 13.9151 18.8731 13.1981 18.0282 12.7764C17.1834 12.3546 16.2069 12.2588 15.2943 12.5082V15.1671C15.2943 15.4609 15.1798 15.7418 14.971 15.9507C14.7621 16.1595 14.4812 16.274 14.1874 16.274C13.8936 16.274 13.6127 16.1595 13.4038 15.9507C13.195 15.7418 13.0805 15.4609 13.0805 15.1671V8.83344C13.0805 8.53962 13.195 8.25873 13.4038 8.04988C13.6127 7.84102 13.8936 7.72656 14.1874 7.72656H16.6183Z" fill="#003c1a"/>
+                    </svg>
+                </span>
+                <a href="#" class="logo-text">Veridia Vision</a>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#features" class="nav-link">Features</a></li>
+                <li><a href="#contact" class="nav-link">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <main class="hero-container">
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1>Smart Recycling,<br>Powered by AI</h1>
+                <p class="hero-description">Veridia Vision uses cutting-edge AI to analyze live camera feeds, providing real-time waste classification for a greener future.</p>
+                <button id="start-detection-button" class="cta-button">
+                    Start Detection
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Features Section -->
+    <section id="features" class="features-section">
+        <div class="section-container">
+            <h2 class="section-title">How It Works</h2>
+            <div class="feature-cards">
+                <div class="feature-card">
+                    <span class="feature-icon material-symbols-rounded">camera</span>
+                    <h3>Point & Scan</h3>
+                    <p>Simply point your camera at waste items and let our AI do the rest. No manual sorting required.</p>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-icon material-symbols-rounded">analytics</span>
+                    <h3>Instant Analysis</h3>
+                    <p>Get immediate identification of objects with classification as recyclable, non-recyclable, or organic waste.</p>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-icon material-symbols-rounded">settings_voice</span>
+                    <h3>Voice Feedback</h3>
+                    <p>Hands-free operation with voice announcements of detection results and classification guidance.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact-section">
+        <div class="section-container">
+            <h2 class="section-title">Contact Us</h2>
+            <p class="contact-description">Have questions or feedback about Veridia Vision? Reach out to our team.</p>
+            <div class="contact-cards">
+                <div class="contact-card">
+                    <span class="contact-icon material-symbols-rounded">email</span>
+                    <h3>Email</h3>
+                    <a href="mailto:koustubhnemani@gmail.com" class="contact-link">koustubhnemani@gmail.com</a>
+                </div>
+                <div class="contact-card">
+                    <span class="contact-icon material-symbols-rounded">alternate_email</span>
+                    <h3>Academic</h3>
+                    <a href="mailto:nemas0495@wrdsb.ca" class="contact-link">nemas0495@wrdsb.ca</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="main-footer">
+        <div class="section-container">
+            <p>© 2025 Veridia Vision. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- The Modal -->
+    <div id="instructionModal" class="modal">
+      <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <h2>Before You Start</h2>
+        <p>Here's a quick guide to using Veridia Vision:</p>
+        <ul>
+            <li>Ensure good lighting for accurate detection</li>
+            <li>Hold the camera steady over waste items</li>
+            <li>Results will appear on the right side panel</li>
+            <li>Use the top controls for voice feedback and camera selection</li>
+        </ul>
+        <button id="proceed-button">Proceed to Camera</button>
+      </div>
+    </div>
+
+    <script>
+        // Get the modal
+        var modal = document.getElementById("instructionModal");
+
+        // Get the button that opens the modal
+        var btn = document.getElementById("start-detection-button");
+
+        // Get the <span> element that closes the modal
+        var span = document.getElementsByClassName("close-button")[0];
+
+        // Get the proceed button
+        var proceedBtn = document.getElementById("proceed-button");
+
+        // When the user clicks the button, open the modal 
+        btn.onclick = function() {
+          modal.style.display = "block";
+        }
+
+        // When the user clicks on <span> (x), close the modal
+        span.onclick = function() {
+          modal.style.display = "none";
+        }
+
+        // When the user clicks on the proceed button, navigate to camera page
+        proceedBtn.onclick = function() {
+          window.location.href = "{{ url_for('camera_page') }}"; 
+        }
+
+        // When the user clicks anywhere outside of the modal, close it
+        window.onclick = function(event) {
+          if (event.target == modal) {
+            modal.style.display = "none";
+          }
+        }
+    </script>
+</body>
+</html>
