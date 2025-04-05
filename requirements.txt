@@ -1,0 +1,11 @@
+# requirements.txt
+Flask
+google-generativeai
+Pillow
+pydantic
+python-dotenv
+numpy
+gunicorn
+gtts
+# Add opencv-python if you plan to re-integrate camera features later
+# opencv-python
