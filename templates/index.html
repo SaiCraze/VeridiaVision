@@ -34,8 +34,8 @@
             <div class="logo-container">
                 <span class="logo-icon">
                     <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M13 2C10.4288 2 7.9154 2.76244 5.77759 4.1909C3.63978 5.61935 1.97351 7.64968 0.991826 10.0251C0.0101517 12.4006 -0.252401 15.0144 0.250707 17.5362C0.753815 20.0579 1.98979 22.3743 3.80762 24.1921C5.62545 26.01 7.94189 27.2459 10.4636 27.749C12.9854 28.2521 15.5992 27.9895 17.9747 27.0078C20.3502 26.0262 22.3805 24.3599 23.809 22.2221C25.2374 20.0843 25.9999 17.5709 25.9999 14.9997C25.9999 11.4869 24.5777 8.10073 22.0498 5.57285C19.5219 3.04497 16.1357 1.62275 12.6229 1.62275L13 2Z" fill="#00DC82"/>
-                        <path d="M16.6183 7.72656C16.9121 7.72656 17.193 7.84102 17.4018 8.04988C17.6107 8.25873 17.7251 8.53962 17.7251 8.83344V11.0472C18.8078 11.2852 19.787 11.8768 20.5051 12.7328C21.2232 13.5888 21.6341 14.6612 21.6736 15.78C21.713 16.8988 21.3786 18.0004 20.7207 18.9107C20.0627 19.8211 19.1207 20.487 18.0566 20.7978C16.9924 21.1086 15.8558 21.0442 14.8335 20.6148C13.8113 20.1855 12.9638 19.4167 12.4369 18.4371C11.91 17.4575 11.7326 16.327 11.9343 15.2329C12.136 14.1388 12.7051 13.1462 13.5487 12.4145C13.6158 12.3533 13.6971 12.3086 13.7861 12.2848C13.875 12.2611 13.9686 12.2591 14.0584 12.279C14.1482 12.2989 14.2313 12.3401 14.3007 12.3985C14.3701 12.4569 14.4237 12.5307 14.4565 12.6135C14.4893 12.6963 14.5 12.7853 14.488 12.8724C14.4759 12.9594 14.4415 13.0416 14.3878 13.1116C14.334 13.1815 14.2627 13.2371 14.1801 13.2731C14.0975 13.3091 14.0064 13.3245 13.9164 13.318C13.1855 13.897 12.6909 14.7381 12.543 15.6746C12.3951 16.6111 12.6049 17.5705 13.1318 18.3577C13.6586 19.1449 14.4653 19.7056 15.3871 19.9356C16.3089 20.1656 17.2845 20.0478 18.1183 19.6051C18.9521 19.1624 19.5871 18.4291 19.9105 17.5407C20.2339 16.6523 20.2211 15.6743 19.8745 14.7947C19.5279 13.9151 18.8731 13.1981 18.0282 12.7764C17.1834 12.3546 16.2069 12.2588 15.2943 12.5082V15.1671C15.2943 15.4609 15.1798 15.7418 14.971 15.9507C14.7621 16.1595 14.4812 16.274 14.1874 16.274C13.8936 16.274 13.6127 16.1595 13.4038 15.9507C13.195 15.7418 13.0805 15.4609 13.0805 15.1671V8.83344C13.0805 8.53962 13.195 8.25873 13.4038 8.04988C13.6127 7.84102 13.8936 7.72656 14.1874 7.72656H16.6183Z" fill="#003c1a"/>
+                        <path d="M13 2C10.4288 2 7.9154 2.76244 5.77759 4.1909C3.63978 5.61935 1.97351 7.64968 0.991826 10.0251C0.0101517 12.4006 -0.252401 15.0144 0.250707 17.5362C0.753815 20.057[...]" fill="currentColor"/>
+                        <path d="M16.6183 7.72656C16.9121 7.72656 17.193 7.84102 17.4018 8.04988C17.6107 8.25873 17.7251 8.53962 17.7251 8.83344V11.0472C18.8078 11.2852 19.787 11.8768 20.5051 12.7[...]" fill="currentColor"/>
                     </svg>
                 </span>
                 <a href="#" class="logo-text">Veridia Vision</a>
@@ -110,55 +110,13 @@
         </div>
     </footer>
 
-    <!-- The Modal -->
-    <div id="instructionModal" class="modal">
-      <div class="modal-content">
-        <span class="close-button">&times;</span>
-        <h2>Before You Start</h2>
-        <p>Here's a quick guide to using Veridia Vision:</p>
-        <ul>
-            <li>Ensure good lighting for accurate detection</li>
-            <li>Hold the camera steady over waste items</li>
-            <li>Results will appear on the right side panel</li>
-            <li>Use the top controls for voice feedback and camera selection</li>
-        </ul>
-        <button id="proceed-button">Proceed to Camera</button>
-      </div>
-    </div>
-
     <script>
-        // Get the modal
-        var modal = document.getElementById("instructionModal");
-
-        // Get the button that opens the modal
+        // Get the button
         var btn = document.getElementById("start-detection-button");
 
-        // Get the <span> element that closes the modal
-        var span = document.getElementsByClassName("close-button")[0];
-
-        // Get the proceed button
-        var proceedBtn = document.getElementById("proceed-button");
-
-        // When the user clicks the button, open the modal 
+        // When the user clicks the button, go directly to camera page
         btn.onclick = function() {
-          modal.style.display = "block";
-        }
-
-        // When the user clicks on <span> (x), close the modal
-        span.onclick = function() {
-          modal.style.display = "none";
-        }
-
-        // When the user clicks on the proceed button, navigate to camera page
-        proceedBtn.onclick = function() {
-          window.location.href = "{{ url_for('camera_page') }}"; 
-        }
-
-        // When the user clicks anywhere outside of the modal, close it
-        window.onclick = function(event) {
-          if (event.target == modal) {
-            modal.style.display = "none";
-          }
+            window.location.href = "{{ url_for('camera_page') }}";
         }
     </script>
 </body>
