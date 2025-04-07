@@ -13,7 +13,6 @@
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-
       gtag('config', 'G-ZDVYQL279E');
     </script>
 
@@ -25,7 +24,31 @@
     <!-- Material Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
 
+    <!-- Use Flask's url_for for robust linking -->
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        /* --- Additions/Modifications for Camera Fit and Glow --- */
+        #camera-view-wrapper {
+            /* Existing styles */
+            transition: box-shadow 0.3s ease-out; /* Smooth transition for glow */
+        }
+
+        #camera-view-wrapper.capturing-glow {
+            box-shadow: 0 0 25px 10px rgba(0, 220, 130, 0.7); /* Brighter green glow */
+            /* Or use a white glow: */
+            /* box-shadow: 0 0 20px 10px rgba(255, 255, 255, 0.8); */
+        }
+
+        #camera-container video,
+        #result-image-container img {
+            display: block;
+            width: 100%; /* Fill container width */
+            height: auto; /* Adjust height based on aspect ratio */
+            max-height: 100%; /* Don't exceed container height */
+            object-fit: contain; /* Maintain aspect ratio, fit within bounds */
+        }
+        /* --- End Additions/Modifications --- */
+    </style>
 </head>
 <body class="app-body">
     <!-- Start Detection Modal -->
@@ -35,7 +58,7 @@
         <p>Click the button below to start the camera and begin waste classification.</p>
         <button id="force-start-button" class="cta-button">Start Detection</button>
       </div>
-        </div>
+    </div>
 
     <div id="camera-app-container">
         <!-- Header Bar -->
@@ -47,10 +70,10 @@
                         <path d="M16.6183 7.72656C16.9121 7.72656 17.193 7.84102 17.4018 8.04988C17.6107 8.25873 17.7251 8.53962 17.7251 8.83344V11.0472C18.8078 11.2852 19.787 11.8768 20.5051 12.7328C21.2232 13.5888 21.6341 14.6612 21.6736 15.78C21.713 16.8988 21.3786 18.0004 20.7207 18.9107C20.0627 19.8211 19.1207 20.487 18.0566 20.7978C16.9924 21.1086 15.8558 21.0442 14.8335 20.6148C13.8113 20.1855 12.9638 19.4167 12.4369 18.4371C11.91 17.4575 11.7326 16.327 11.9343 15.2329C12.136 14.1388 12.7051 13.1462 13.5487 12.4145C13.6158 12.3533 13.6971 12.3086 13.7861 12.2848C13.875 12.2611 13.9686 12.2591 14.0584 12.279C14.1482 12.2989 14.2313 12.3401 14.3007 12.3985C14.3701 12.4569 14.4237 12.5307 14.4565 12.6135C14.4893 12.6963 14.5 12.7853 14.488 12.8724C14.4759 12.9594 14.4415 13.0416 14.3878 13.1116C14.334 13.1815 14.2627 13.2371 14.1801 13.2731C14.0975 13.3091 14.0064 13.3245 13.9164 13.318C13.1855 13.897 12.6909 14.7381 12.543 15.6746C12.3951 16.6111 12.6049 17.5705 13.1318 18.3577C13.6586 19.1449 14.4653 19.7056 15.3871 19.9356C16.3089 20.1656 17.2845 20.0478 18.1183 19.6051C18.9521 19.1624 19.5871 18.4291 19.9105 17.5407C20.2339 16.6523 20.2211 15.6743 19.8745 14.7947C19.5279 13.9151 18.8731 13.1981 18.0282 12.7764C17.1834 12.3546 16.2069 12.2588 15.2943 12.5082V15.1671C15.2943 15.4609 15.1798 15.7418 14.971 15.9507C14.7621 16.1595 14.4812 16.274 14.1874 16.274C13.8936 16.274 13.6127 16.1595 13.4038 15.9507C13.195 15.7418 13.0805 15.4609 13.0805 15.1671V8.83344C13.0805 8.53962 13.195 8.25873 13.4038 8.04988C13.6127 7.84102 13.8936 7.72656 14.1874 7.72656H16.6183Z" fill="#003c1a"/>
                     </svg>
                 </span>
+                <!-- Use url_for for the home link -->
                 <a href="{{ url_for('index') }}" class="logo-text">Veridia Vision</a>
             </div>
             <div class="controls-header">
-                 <!-- Timer removed -->
                 <div class="control-group">
                      <span class="material-symbols-rounded">volume_up</span>
                      <label for="tts-toggle">Voice</label>
@@ -68,18 +91,19 @@
                     </select>
                 </div>
             </div>
-             <button id="home-button" class="app-button" title="Return to Home">
-                 <span class="material-symbols-rounded">home</span>
-                 <span>Home</span>
+             <!-- Home button now uses stopAndExit -->
+             <button id="home-button" class="app-button" title="Stop and Return to Home">
+                 <span class="material-symbols-rounded">stop_circle</span> <!-- Changed Icon -->
+                 <span>Stop & Home</span> <!-- Changed Text -->
              </button>
         </header>
 
         <!-- Main Content Area -->
         <main id="main-content">
-            <div id="camera-view-wrapper">
+            <div id="camera-view-wrapper"> <!-- Added ID for glow effect target -->
                 <!-- Video Feed Container -->
                 <div id="camera-container" class="media-container">
-            <video id="video-feed" autoplay playsinline muted></video>
+                    <video id="video-feed" autoplay playsinline muted></video>
                      <!-- Loading/Processing Overlay -->
                      <div id="processing-overlay" class="overlay hidden">
                         <div class="spinner"></div>
@@ -90,11 +114,11 @@
                          <span class="material-symbols-rounded">error</span>
                          <span id="error-text">Error accessing camera.</span>
                      </div>
-        </div>
-                 <!-- Result Image Container (Initially hidden) -->
+                 </div>
+                 <!-- Result Image Container -->
                  <div id="result-image-container" class="media-container hidden">
-            <img id="result-image" alt="Classification Result">
-        </div>
+                     <img id="result-image" alt="Classification Result">
+                 </div>
             </div>
 
             <!-- Prediction Sidebar -->
@@ -108,7 +132,7 @@
                     <p class="placeholder-text">Initializing...</p>
                 </div>
                 <div class="sidebar-footer">
-                    <!-- Stop Button Added, initially hidden -->
+                    <!-- Stop Button (now redundant with header button but kept for clarity if needed) -->
                     <button id="stop-detection-button" class="action-button stop-button hidden">
                         <span class="material-symbols-rounded">stop_circle</span>
                         <span>Stop & Exit</span>
@@ -127,47 +151,48 @@
         const video = document.getElementById('video-feed');
         const canvas = document.getElementById('canvas');
         const context = canvas.getContext('2d');
+        const cameraViewWrapper = document.getElementById('camera-view-wrapper'); // For glow
         const cameraContainer = document.getElementById('camera-container');
         const resultImageContainer = document.getElementById('result-image-container');
         const resultImage = document.getElementById('result-image');
         const predictionSidebar = document.getElementById('prediction-sidebar');
         const predictionContent = document.getElementById('prediction-content');
         const sidebarFooter = document.querySelector('.sidebar-footer');
-        const stopDetectionButton = document.getElementById('stop-detection-button'); // New stop button
-        const startModal = document.getElementById('startModal'); // The new modal
-        const forceStartButton = document.getElementById('force-start-button'); // Button inside the modal
+        const stopDetectionButton = document.getElementById('stop-detection-button');
+        const startModal = document.getElementById('startModal');
+        const forceStartButton = document.getElementById('force-start-button');
         const ttsToggle = document.getElementById('tts-toggle');
         const cameraSelect = document.getElementById('camera-select');
-        // const timerDisplay = document.getElementById('timer-display'); // Removed
         const processingOverlay = document.getElementById('processing-overlay');
         const errorOverlay = document.getElementById('error-overlay');
         const errorText = document.getElementById('error-text');
-        const homeButton = document.getElementById('home-button');
+        const homeButton = document.getElementById('home-button'); // Now also functions as stop
 
         // --- State & Config ---
         let stream = null;
         let captureInterval = null;
-        // let countdownInterval = null; // Removed
         let resultTimeout = null;
-        // let currentTimer = 0; // Removed
+        let sessionTimeoutId = null; // Timeout for the 1-minute session
+        let glowTimeoutId = null; // Timeout for removing glow effect
         let isProcessing = false;
         let ttsEnabled = true;
         let currentDeviceId = null;
         let availableCameras = [];
 
-        const CAPTURE_INTERVAL_MS = 7000; // 7 seconds between scans
+        const CAPTURE_INTERVAL_MS = 5000; // Scan every 5 seconds
+        const SESSION_TIMEOUT_MS = 60 * 1000; // 1 minute session timeout
+        const GLOW_DURATION_MS = 300; // How long the glow effect lasts
         const RESULT_DISPLAY_MS = 3000; // How long to show result image
         const VIDEO_CONSTRAINTS = {
             video: {
                 width: { ideal: 1280 },
                 height: { ideal: 720 },
                 facingMode: 'environment' // Default preference
-                // deviceId will be added if specific camera selected
             },
             audio: false
         };
 
-        // --- Text-to-Speech ---
+        // --- Text-to-Speech (No changes needed) ---
         const synth = window.speechSynthesis;
         let voices = [];
         function populateVoiceList() {
@@ -211,12 +236,12 @@
                          console.warn("No English voices loaded, using default.");
                  }
                  utterance.pitch = 1;
-                    utterance.rate = 1.1;
+                 utterance.rate = 1.1;
                  synth.speak(utterance);
              } catch (e) {
                  console.error("Error initiating speech:", e);
              }
-            }, 50);
+            }, 50); // Small delay helps prevent cutting off rapidly
         }
 
         // --- UI Updates ---
@@ -231,6 +256,7 @@
             console.error("UI Error Displayed:", message, consoleError || '');
             errorText.textContent = message;
             errorOverlay.classList.remove('hidden');
+            // Auto-hide error overlay
             clearTimeout(errorOverlay.timeoutId);
             errorOverlay.timeoutId = setTimeout(() => errorOverlay.classList.add('hidden'), 5000);
         }
@@ -241,22 +267,25 @@
              if (placeholder) placeholder.remove();
         }
 
-        function resetPredictionContent(message = '') {
-            if (message) {
-                predictionContent.innerHTML = `<p class="placeholder-text">${message}</p>`;
-            } else {
-                predictionContent.innerHTML = ''; // Clear content entirely
-            }
+        function resetPredictionContent(message = 'Scanning...') { // Default to Scanning
+            predictionContent.innerHTML = `<p class="placeholder-text">${message}</p>`;
         }
 
-        // Timer functions removed: updateTimerDisplay, startCountdownTimer
+        function triggerGlowEffect() {
+            clearTimeout(glowTimeoutId); // Clear previous timeout if any
+            cameraViewWrapper.classList.add('capturing-glow');
+            glowTimeoutId = setTimeout(() => {
+                cameraViewWrapper.classList.remove('capturing-glow');
+            }, GLOW_DURATION_MS);
+        }
 
-        // --- Camera & Devices ---
+        // --- Camera & Devices (No major changes needed) ---
         async function getCameraDevices() {
             console.log("getCameraDevices: Starting...");
             cameraSelect.disabled = true;
             cameraSelect.innerHTML = '<option>Loading Cameras...</option>';
             try {
+                // Request permission early if needed
                 await navigator.mediaDevices.getUserMedia({ video: true });
                 const devices = await navigator.mediaDevices.enumerateDevices();
                 availableCameras = devices.filter(device => device.kind === 'videoinput');
@@ -265,7 +294,7 @@
                 if (availableCameras.length === 0) {
                      cameraSelect.innerHTML = '<option>No cameras found</option>';
                      showError("No video cameras found on this device.");
-                     return; // Crucial: stop if no cameras
+                     return;
                 }
 
                 cameraSelect.disabled = false;
@@ -274,6 +303,7 @@
                     const option = document.createElement('option');
                     option.value = camera.deviceId;
                     option.textContent = camera.label || `Camera ${index + 1}`;
+                    // Prefer back/environment camera
                     if (!selectedDeviceId && (camera.label.toLowerCase().includes('back') || camera.label.toLowerCase().includes('environment'))) {
                         option.selected = true;
                         selectedDeviceId = camera.deviceId;
@@ -281,21 +311,22 @@
                     cameraSelect.appendChild(option);
                 });
 
+                // Default to first camera if no preference matched
                 if (!selectedDeviceId && availableCameras.length > 0) {
                      selectedDeviceId = availableCameras[0].deviceId;
-                     cameraSelect.value = selectedDeviceId;
+                     cameraSelect.value = selectedDeviceId; // Set dropdown value
                  }
 
                 currentDeviceId = selectedDeviceId;
                 console.log("Initial Camera Device ID:", currentDeviceId);
+                cameraSelect.addEventListener('change', handleCameraChange); // Attach listener here
                 console.log("getCameraDevices: Success, found", availableCameras.length, "cameras.");
-                cameraSelect.addEventListener('change', handleCameraChange);
 
             } catch (err) {
                 console.error("Error in getCameraDevices:", err);
                 let userMessage = "Error accessing cameras.";
                 if (err.name === "NotAllowedError") {
-                    userMessage = "Camera permission denied. Please allow camera access in your browser settings.";
+                    userMessage = "Camera permission denied. Please allow camera access in browser settings.";
                 } else if (err.name === "NotFoundError") {
                     userMessage = "No suitable camera found on this device.";
                 } else {
@@ -310,21 +341,24 @@
 
         async function startCameraStream() {
              console.log("startCameraStream: Attempting to start...");
-             if (stream) {
-                 console.log("startCameraStream: Stopping existing stream first.");
-                 stream.getTracks().forEach(track => track.stop());
-                 stream = null;
-             }
-             errorOverlay.classList.add('hidden');
+             stopStream(); // Ensure any old stream is stopped first
+             errorOverlay.classList.add('hidden'); // Hide previous errors
 
             const constraints = { ...VIDEO_CONSTRAINTS };
-             constraints.video = constraints.video || {};
+             constraints.video = constraints.video || {}; // Ensure video object exists
 
              if (currentDeviceId) {
                  constraints.video.deviceId = { exact: currentDeviceId };
-                 delete constraints.video.facingMode;
+                 delete constraints.video.facingMode; // Don't specify both
                  console.log(`Requesting specific camera ID: ${currentDeviceId}`);
-             } else {
+             } else if (availableCameras.length > 0) {
+                 // Fallback if somehow currentDeviceId is null but cameras exist
+                 constraints.video.deviceId = { exact: availableCameras[0].deviceId };
+                 delete constraints.video.facingMode;
+                 console.log(`Fallback: Requesting first available camera ID: ${availableCameras[0].deviceId}`);
+             }
+             else {
+                 // Default if no specific device known
                  constraints.video.facingMode = 'environment';
                  console.log(`Requesting camera by facingMode: ${constraints.video.facingMode}`);
              }
@@ -333,214 +367,254 @@
                 stream = await navigator.mediaDevices.getUserMedia(constraints);
                 video.srcObject = stream;
                 await video.play();
-                await new Promise((resolve) => { video.onloadedmetadata = resolve; });
+                // Wait for metadata to ensure dimensions are available
+                await new Promise((resolve, reject) => {
+                    video.onloadedmetadata = resolve;
+                    video.onerror = reject; // Handle potential errors during loading
+                 });
                 canvas.width = video.videoWidth;
                 canvas.height = video.videoHeight;
                 console.log(`startCameraStream: Success. Stream dimensions: ${video.videoWidth}x${video.videoHeight}`);
                 cameraContainer.classList.remove('hidden');
                 resultImageContainer.classList.add('hidden');
-                return true; // Success
+                return true; // Indicate success
             } catch (err) {
                 console.error("Error starting camera stream:", err);
                 let userMessage = `Camera Error: ${err.name}.`;
-                // ... (keep existing detailed error messages) ...
                  if (err.name === "NotAllowedError") {
-                    userMessage = "Camera permission denied. Please allow camera access.";
-                } else if (err.name === "NotFoundError") {
-                    userMessage = "Selected camera not found or unavailable.";
-                } else if (err.name === "NotReadableError") {
+                    userMessage = "Camera permission denied. Please allow access.";
+                 } else if (err.name === "NotFoundError") {
+                    userMessage = "Selected camera not found or is unavailable.";
+                 } else if (err.name === "NotReadableError") {
                     userMessage = "Camera may be in use by another application.";
-                } else if (err.name === "OverconstrainedError") {
-                    userMessage = `Camera does not support requested resolution. Requested: ${JSON.stringify(constraints.video)}`;
-                } else {
-                     userMessage = `Failed to start camera: ${err.name}. Try selecting another camera or check permissions.`;
+                 } else if (err.name === "OverconstrainedError") {
+                    userMessage = `Camera doesn't support request. Try another camera.`;
+                 } else {
+                     userMessage = `Failed to start camera: ${err.name}. Check permissions/connections.`;
                  }
-                console.error(userMessage); // Log to console instead
+                showError(userMessage, err); // Show error to user via overlay
+                stopStream(); // Clean up
+                return false; // Indicate failure
+            }
+        }
+
+        function stopStream() {
+            if (stream) {
+                console.log("Stopping existing stream.");
+                stream.getTracks().forEach(track => track.stop());
                 stream = null;
                 video.srcObject = null;
-                errorText.textContent = userMessage;
-                resultImageContainer.classList.add('hidden');
-                console.log("startCameraStream: Failed.");
-                return false; // Failure
             }
         }
 
         async function handleCameraChange() {
              const selectedId = cameraSelect.value;
-             if (selectedId === currentDeviceId || !captureInterval) return; 
+             if (selectedId === currentDeviceId || !selectedId) return; // No change or invalid selection
 
              currentDeviceId = selectedId;
              console.log("Camera selected via dropdown:", currentDeviceId);
 
+             // Stop current processing and restart immediately with the new camera
              console.log("Restarting stream and scan for new camera...");
-             clearInterval(captureInterval); 
+             clearTimeout(sessionTimeoutId); // Reset session timer on camera change
+             sessionTimeoutId = null;
+             clearInterval(captureInterval);
              captureInterval = null;
-             clearTimeout(resultTimeout); 
+             clearTimeout(resultTimeout);
              resultTimeout = null;
-             
-             // Stop the old stream before starting the new one
-             if (stream) {
-                 stream.getTracks().forEach(track => track.stop());
-                 stream = null;
-                 video.srcObject = null;
-             }
+             stopStream(); // Stop the old stream explicitly
 
-             // Restart scanning immediately after camera change
-             // No need for delay here as user explicitly changed camera
-             await startScanning(); 
+             resetPredictionContent('Switching cameras...');
+             showProcessing(true, 'Starting new camera...'); // Show processing during switch
+
+             // Give a brief moment for resources to release before restarting
+             await new Promise(resolve => setTimeout(resolve, 100));
+
+             const success = await startCameraStream();
+             showProcessing(false); // Hide processing overlay
+
+             if (success) {
+                 await startScanning(true); // Restart scanning immediately (pass flag to skip initial delay)
+             } else {
+                 // Error handled by startCameraStream, UI shows error message
+                 resetPredictionContent('<p class="error-text">Failed to start selected camera.</p>');
+                 removeStopButton(); // Hide stop button if camera fails
+             }
         }
 
         // --- Scanning Logic ---
-        async function startScanning() {
-             console.log("startScanning: Called.");
-             if (captureInterval) {
-                 console.warn("startScanning: Already scanning, exiting.");
-                 return;
-              }
+        async function startScanning(skipInitialDelay = false) {
+            console.log("startScanning called. Skip delay:", skipInitialDelay);
+            if (captureInterval) {
+                console.warn("startScanning: Already scanning, exiting.");
+                return;
+             }
 
-             console.log("Attempting to start scanning...");
-             // Set message to scanning immediately - don't show "Starting camera..."
-             resetPredictionContent('<p class="placeholder-text">Scanning...</p>');
-             
-             // Start camera in the background
-             startCameraStream().then(success => {
-                 console.log("Camera start attempt result:", success ? "Success" : "Failed");
-             }).catch(err => {
-                 console.error("Camera start error:", err);
-             });
-             
-             // Show the stop button regardless
-             createStopButton();
+            console.log("Attempting to start scanning loop...");
+            resetPredictionContent('Starting scan...'); // Initial message
 
-             // Wait 3 seconds, then start the classification process regardless of camera state
-             console.log("Setting up 3-second delay before starting scan...");
-             setTimeout(() => {
-                 console.log("3-second delay complete, starting classification...");
-                 
-                 // Initial immediate capture
-                 captureAndProcessFrame();
-                 
-                 // Schedule subsequent captures continuously
+            // Ensure camera is running or try starting it
+            if (!stream || !stream.active) {
+                const cameraStarted = await startCameraStream();
+                if (!cameraStarted) {
+                    resetPredictionContent('<p class="error-text">Camera unavailable. Cannot start scan.</p>');
+                    // Keep modal hidden, error shown by startCameraStream
+                    return; // Stop if camera fails to start
+                }
+            }
+
+            // Camera should be running now
+            createStopButton(); // Show stop button
+            resetPredictionContent('Scanning...'); // Update status
+
+            // Start the 1-minute session timeout
+            clearTimeout(sessionTimeoutId); // Clear any previous timeout
+            sessionTimeoutId = setTimeout(redirectToThankYou, SESSION_TIMEOUT_MS);
+            console.log(`Session timeout set for ${SESSION_TIMEOUT_MS / 1000} seconds.`);
+
+            const startDelay = skipInitialDelay ? 0 : 1000; // Shorter initial delay, 0 if skipping
+
+            // Use timeout for first capture, then interval
+            setTimeout(() => {
+                 captureAndProcessFrame(); // Immediate first capture
+                 // Schedule subsequent captures
+                 clearInterval(captureInterval); // Ensure no duplicate intervals
                  captureInterval = setInterval(captureAndProcessFrame, CAPTURE_INTERVAL_MS);
-             }, 3000); // 3 second fixed delay
+                 console.log(`Capture interval set for every ${CAPTURE_INTERVAL_MS / 1000} seconds.`);
+            }, startDelay);
         }
 
-        // Renamed stopScanning to reflect its action
-        function stopAndExit() {
-            console.log("stopAndExit: Stopping scan and exiting to home.");
+        // Combined function to stop everything and cleanup
+        function stopEverything(reason = "User action") {
+            console.log(`Stopping everything. Reason: ${reason}`);
             clearInterval(captureInterval);
             captureInterval = null;
-            clearTimeout(resultTimeout); 
+            clearTimeout(resultTimeout);
             resultTimeout = null;
+            clearTimeout(sessionTimeoutId); // Crucial: clear session timeout
+            sessionTimeoutId = null;
+            clearTimeout(glowTimeoutId); // Clear glow timeout
+            cameraViewWrapper.classList.remove('capturing-glow'); // Ensure glow removed
 
-            if (stream) {
-                stream.getTracks().forEach(track => track.stop());
-                stream = null;
+            stopStream(); // Stop the camera stream
+
+            if (synth && synth.speaking) {
+                synth.cancel(); // Stop any ongoing speech
             }
-            if (synth && synth.speaking) { synth.cancel(); }
-
-            // Navigate home
-            window.location.href = "{{ url_for('index') }}"; 
+            showProcessing(false); // Ensure processing overlay is hidden
+            removeStopButton(); // Hide the stop button
+            resetPredictionContent('Scan stopped.'); // Update sidebar
         }
 
+        // Function called by buttons or timeout
+        function stopAndExit() {
+            stopEverything("Stop/Home button clicked");
+            // Navigate home using Flask's url_for if possible, otherwise hardcoded path
+            window.location.href = "{{ url_for('index') }}"; // Assumes 'index' is your home route name
+        }
+
+        // Function called by the session timeout
+        function redirectToThankYou() {
+            console.log("Session timeout reached. Redirecting to thank you page.");
+            stopEverything("Session timeout");
+             // Redirect to the /thank_you route (ensure this route exists in Flask)
+            window.location.href = '/thank_you';
+        }
+
+
         async function captureAndProcessFrame() {
-            // Check stream, but don't abort if there's no active stream - try anyway
-            if (!stream || !stream.active) { 
-                console.warn("captureAndProcessFrame: Stream inactive but attempting to classify anyway.");
-                // Don't stop interval - keep trying
-                // Don't hide stop button
-            }
-            
             if (isProcessing || document.hidden) {
                 console.log("Capture skipped:", { isProcessing, hidden: document.hidden });
                  return;
              }
+             // Check stream validity before proceeding
+            if (!stream || !stream.active || video.paused || video.ended || video.readyState < 3) {
+                 console.warn("captureAndProcessFrame: Stream invalid or video not ready. Skipping frame.");
+                 // Optional: Try to restart the stream? Could lead to loops if camera hardware issue.
+                 // await startCameraStream(); // Be cautious with this.
+                 // For now, just skip the frame and let the interval try again.
+                 return;
+             }
 
-            console.log("Attempting to process frame...");
+            console.log("Attempting to capture and process frame...");
             showProcessing(true, "Analyzing...");
-            clearTimeout(resultTimeout);
+            triggerGlowEffect(); // <<<<<<<< ADD GLOW EFFECT HERE
+            clearTimeout(resultTimeout); // Clear previous result display timeout
 
             try {
-                // If we have a valid stream, capture from it
-                if (stream && stream.active && !video.paused && !video.ended && video.readyState >= 3) {
+                // Ensure canvas dimensions match video (might change if video restarted)
                  if (canvas.width !== video.videoWidth || canvas.height !== video.videoHeight) {
                      canvas.width = video.videoWidth;
                      canvas.height = video.videoHeight;
+                     console.log("Canvas resized to video dimensions:", canvas.width, "x", canvas.height);
                  }
+                 // Draw current video frame to canvas
                 context.drawImage(video, 0, 0, canvas.width, canvas.height);
-                } else {
-                    // No valid stream or video - create a blank canvas
-                    console.log("No valid stream for capture, using blank frame");
-                    context.fillStyle = "#000000";
-                    context.fillRect(0, 0, canvas.width, canvas.height);
-                    // Draw text on canvas to indicate no camera
-                    context.fillStyle = "#ffffff";
-                    context.font = "24px Arial";
-                    context.textAlign = "center";
-                    context.fillText("Camera Unavailable", canvas.width/2, canvas.height/2);
-                }
-                
-                const imageDataUrl = canvas.toDataURL('image/jpeg', 0.88);
+                const imageDataUrl = canvas.toDataURL('image/jpeg', 0.88); // Use slightly higher quality if needed
 
-                const response = await fetch('/process_frame', {
+                // Send frame to backend
+                const response = await fetch("{{ url_for('process_frame') }}", { // Use url_for
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ image_data: imageDataUrl }),
                 });
 
                 const result = await response.json();
-                showProcessing(false);
+                showProcessing(false); // Hide processing overlay AFTER getting response
 
                 if (!response.ok) {
+                    // Throw detailed error from server response if available
                     throw new Error(result.status || result.error || `Server error: ${response.status} ${response.statusText}`);
                  }
                 console.log("Processing result:", result);
 
-                resultImage.src = result.processed_image_data;
-                updatePredictionContent(formatPredictionResult(result));
-                speak(result.status);
+                // Update UI with results
+                resultImage.src = result.processed_image_data; // Update result image source
+                updatePredictionContent(formatPredictionResult(result)); // Update sidebar
+                if (result.status) speak(result.status); // Speak status if available
 
-                // Only toggle visibility if we have a stream
-                if (stream && stream.active) {
+                // Show result image, hide video feed temporarily
                 cameraContainer.classList.add('hidden');
-                    resultImageContainer.classList.remove('hidden');
-                    resultTimeout = setTimeout(() => {
-                        resultImageContainer.classList.add('hidden');
-                        if (stream && stream.active) { // Check stream before showing video
-                         cameraContainer.classList.remove('hidden');
+                resultImageContainer.classList.remove('hidden');
+
+                // Set timeout to switch back to live video feed
+                resultTimeout = setTimeout(() => {
+                    resultImageContainer.classList.add('hidden');
+                    // Only show camera again if stream is still active
+                    if (stream && stream.active) {
+                        cameraContainer.classList.remove('hidden');
+                    } else {
+                        console.log("Result display timeout finished, but stream is inactive.");
+                        // Optionally show an error or message if stream died
                     }
                  }, RESULT_DISPLAY_MS);
-                } else {
-                    // No stream - just show the result
-                    resultImageContainer.classList.remove('hidden');
-                    cameraContainer.classList.add('hidden');
-                }
 
             } catch (error) {
                  console.error('Error processing frame:', error);
-                showProcessing(false);
-                let userMessage = "Analysis Error.";
+                 showProcessing(false); // Ensure overlay hidden on error
+                 let userMessage = "Analysis Error.";
                 if (error instanceof TypeError && error.message.includes('NetworkError')) {
-                    userMessage = "Network Error: Cannot reach server.";
-                } else if (error instanceof SyntaxError) {
-                    userMessage = "Error: Invalid server response.";
-                } else {
-                    userMessage = `Analysis Failed: ${error.message}`;
-                }
-                
-                // Show error in prediction sidebar instead of overlay
-                updatePredictionContent(`<p class="error-text">${userMessage}</p>`);
-                speak(userMessage);
-                
-                // Keep showing whatever was showing before
-                if (stream && stream.active) {
-                    cameraContainer.classList.remove('hidden');
-                } else {
-                    cameraContainer.classList.add('hidden');
-                }
-                resultImageContainer.classList.add('hidden');
-                
-                // Don't call showError - we want to keep the cycle going
+                     userMessage = "Network Error: Cannot reach server.";
+                 } else if (error instanceof SyntaxError) {
+                     userMessage = "Error: Invalid server response.";
+                 } else {
+                     userMessage = `Analysis Failed: ${error.message || 'Unknown error'}`;
+                 }
+
+                 // Display error in the prediction sidebar
+                 updatePredictionContent(`<p class="error-text">${userMessage}</p>`);
+                 speak("Analysis failed."); // Generic audio feedback for error
+
+                 // Ensure video feed (if active) or error placeholder is shown, not the (stale) result image
+                 resultImageContainer.classList.add('hidden');
+                 if (stream && stream.active) {
+                     cameraContainer.classList.remove('hidden');
+                 } else {
+                     cameraContainer.classList.add('hidden'); // Hide if stream is dead
+                     // Potentially show the error overlay on the camera view too?
+                     // showError("Analysis failed, camera may be inactive.");
+                 }
+                 // Don't stop the interval on processing errors, let it try again
             }
         }
 
@@ -548,20 +622,22 @@
             if (result.error) {
                 return `<p class="error-text">${result.error}</p>`;
             }
+            // Use boxes_found and check array length for robustness
             if (!result.boxes_found || !Array.isArray(result.object_details) || result.object_details.length === 0) {
-                 return '<p class="placeholder-text">No classifiable objects detected.</p>';
+                 return '<p class="placeholder-text">No classifiable objects detected in the frame.</p>'; // More specific message
             }
 
             let html = '<ul class="prediction-list">';
             result.object_details.forEach(detail => {
-                 const objectName = detail.name || 'Unknown';
+                 const objectName = detail.name ? detail.name.charAt(0).toUpperCase() + detail.name.slice(1) : 'Unknown Object'; // Capitalize
                  const classification = detail.classification || 'unclassified';
-                 const classificationClass = classification.toLowerCase().replace(/[^a-z0-9]/g, '');
+                 // Sanitize classification for CSS class (lowercase, letters/numbers only)
+                 const classificationClass = classification.toLowerCase().replace(/[^a-z0-9]/g, '') || 'unclassified';
 
                  html += `
                      <li class="prediction-item ${classificationClass}">
                          <span class="object-name">${objectName}</span>
-                         <span class="object-classification ${classificationClass}">${classification}</span>
+                         <span class="object-classification ${classificationClass}">${classification.toUpperCase()}</span>
                      </li>
                  `;
             });
@@ -570,82 +646,78 @@
         }
 
         // --- Event Listeners ---
-        stopDetectionButton.addEventListener('click', stopAndExit); // Listener for the new stop button
-        
+        stopDetectionButton.addEventListener('click', stopAndExit); // Sidebar stop button
+        homeButton.addEventListener('click', stopAndExit); // Header stop/home button
+
         ttsToggle.addEventListener('change', () => {
              ttsEnabled = ttsToggle.checked;
              console.log("TTS Enabled:", ttsEnabled);
-             // Simplified - just speak if enabled
-             if (ttsEnabled) { speak("Voice feedback enabled."); }
-             else if (synth && synth.speaking) { synth.cancel(); }
+             if (ttsEnabled) {
+                 speak("Voice feedback enabled.");
+             } else if (synth && synth.speaking) {
+                 synth.cancel(); // Stop speaking immediately if disabled
+             }
         });
-        
-        homeButton.addEventListener('click', stopAndExit); // Home button also stops and exits
-         
-         // Page visibility/unload listeners simplified or removed
+
+         // Handle page close/navigation
          window.addEventListener('beforeunload', () => {
-             console.log("Page unloading, stopping stream and interval.");
-             clearInterval(captureInterval); 
-             captureInterval = null;
-             if (stream) {
-                 stream.getTracks().forEach(track => track.stop());
-                 stream = null;
-             }
-             if (synth && synth.speaking) {
-                  synth.cancel();
-             }
+             console.log("Page unloading, ensuring cleanup.");
+             stopEverything("Page unload");
          });
 
         // --- Initialization ---
         async function initializeApp() {
             console.log("Initializing Camera App (waiting for user start)...");
-            ttsToggle.checked = ttsEnabled; 
-            resetPredictionContent('Waiting to start...'); // Initial message before modal
-            // updateTimerDisplay(0); // Timer removed
-            
+            ttsToggle.checked = ttsEnabled;
+            resetPredictionContent('Waiting to start...'); // Initial placeholder
+
             try {
-                // Get devices ready, but don't start stream yet
-                await getCameraDevices(); 
+                // Get devices ready beforehand, improves user experience
+                await getCameraDevices();
                 if (availableCameras.length === 0) {
-                    console.log("Initialization failed: No cameras found.");
-                    resetPredictionContent('<p class="error-text">No camera detected.</p>');
-                    startModal.classList.add('hidden'); // Hide modal if no camera anyway
+                    console.error("Initialization failed: No cameras found.");
+                    resetPredictionContent('<p class="error-text">No camera detected. Cannot start.</p>');
+                    startModal.classList.remove('modal-visible'); // Hide modal if no cameras
+                    startModal.style.display = 'none'; // Ensure it's hidden
                     // Error should have been shown by getCameraDevices
                 } else {
-                    // Cameras found, modal is already visible, wait for button click
+                    // Cameras found, modal is already visible via CSS (.modal-visible)
                     console.log("Cameras found. Waiting for user to click Start Detection in modal.");
                 }
             } catch (error) {
                 console.error("Initialization error:", error);
                 resetPredictionContent('<p class="error-text">Initialization failed.</p>');
-                showError("Failed to initialize camera system.");
-                startModal.classList.add('hidden'); // Hide modal on init error
+                showError("Failed to initialize camera system.", error);
+                startModal.classList.remove('modal-visible'); // Hide modal on init error
+                startModal.style.display = 'none'; // Ensure it's hidden
             }
-            
-            console.log("Initialization sequence complete (ready for user start).");
+
+            console.log("Initialization sequence complete.");
         }
 
-        // Add listener for the modal's start button
+        // Listener for the modal's start button
         forceStartButton.addEventListener('click', async () => {
-            console.log("Force start button clicked.");
-            startModal.classList.remove('modal-visible'); // Remove the visible class to hide it via display:none
+            console.log("Start Detection button clicked.");
+            startModal.classList.remove('modal-visible'); // Hide modal visually
+            // Use timeout to ensure CSS transition completes before potential blocking operations
+            setTimeout(() => {
+                 startModal.style.display = 'none'; // Fully hide modal
+            }, 300); // Match modal fade-out time if any
+
             await startScanning(); // Start the scanning process
         });
 
+        // Helper to show/hide the stop button(s)
         function createStopButton() {
-             // Just make the existing stop button visible
-             if (stopDetectionButton) {
-                 stopDetectionButton.classList.remove('hidden');
-             }
-         }
-         
-         function removeStopButton() {
-             // Just hide the existing stop button
-             if (stopDetectionButton) {
-                 stopDetectionButton.classList.add('hidden');
-             }
+             stopDetectionButton.classList.remove('hidden');
+             // Maybe hide the Start button if it were visible? Not applicable here.
          }
 
+         function removeStopButton() {
+             stopDetectionButton.classList.add('hidden');
+         }
+
+        // Start the app initialization process when the script loads
         initializeApp();
 
     </script>
