@@ -108,6 +108,10 @@ def classify_waste(image_bytes):
         Analyze the image and identify distinct objects. For each object:
         1. Name the specific object (e.g., "plastic bottle", "banana peel", "cardboard box")
         2. Classify it as 'recyclable', 'non-recyclable', or 'organic'
+        3. Classify it according to the rules of Waterloo Region.
+        4. Classify humans as 'human'.
+        5. Classify chips packets, chocolate wrappers, etc. as 'non-recyclable'.
+        6. If a bottle has liquid or a container has food, classify as 'non-recyclable'.
 
         Return ONLY a valid JSON array of objects. Each object must have the following format:
         {
