@@ -101,7 +101,7 @@ def draw_bounding_boxes(image_bytes, bounding_boxes):
 # --- Gemini API Interaction ---
 def classify_waste(image_bytes):
     try:
-        client = genai.GenerativeModel(model_name="gemini-1.5-flash-latest")
+        client = genai.GenerativeModel(model_name="gemini-2.0-flash")
         image_part = {"mime_type": "image/jpeg", "data": image_bytes}
         prompt = """
         You are Veridia Vision, a waste classification assistant.
