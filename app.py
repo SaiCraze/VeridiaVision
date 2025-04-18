@@ -192,6 +192,12 @@ def index():
 @app.route('/camera')
 def camera_page():
     return render_template('camera.html')
+    
+@app.route('/camera_test')
+def camera_test_page():
+    """Renders the test version of the camera page."""
+    # This will render the new file you create in Step 1
+    return render_template('camera_test.html')
 
 @app.route('/process_frame', methods=['POST'])
 def process_frame():
