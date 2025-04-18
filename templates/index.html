@@ -6,39 +6,47 @@
     <title>Veridia Vision - Smart Recycling</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>♻️</text></svg>">
 
-    <!-- Google Analytics -->
-    <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZDVYQL279E"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-
       gtag('config', 'G-ZDVYQL279E');
     </script>
 
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@400;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Material Icons -->
+
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0" rel="stylesheet">
 
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        .hero-buttons {
+            display: flex;
+            gap: var(--space-sm, 16px); /* Use variable from styles.css or default */
+            flex-wrap: wrap;
+        }
+        #test-interface-button {
+            background-color: var(--subtle-gray, #2c2c2c);
+            color: var(--primary-green, #00DC82);
+            border: 1px solid var(--primary-green, #00DC82);
+        }
+         #test-interface-button:hover {
+             background-color: rgba(0, 220, 130, 0.1);
+             box-shadow: 0 4px 12px rgba(0, 220, 130, 0.2);
+             transform: translateY(-2px); /* Keep hover effect consistent */
+         }
+    </style>
 </head>
 <body class="modern-page">
-    <!-- Navigation -->
     <nav class="main-nav">
         <div class="nav-container">
             <div class="logo-container">
                 <span class="logo-icon">
-                    <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M13 2C10.4288 2 7.9154 2.76244 5.77759 4.1909C3.63978 5.61935 1.97351 7.64968 0.991826 10.0251C0.0101517 12.4006 -0.252401 15.0144 0.250707 17.5362C0.753815 20.057[...]" fill="currentColor"/>
-                        <path d="M16.6183 7.72656C16.9121 7.72656 17.193 7.84102 17.4018 8.04988C17.6107 8.25873 17.7251 8.53962 17.7251 8.83344V11.0472C18.8078 11.2852 19.787 11.8768 20.5051 12.7[...]" fill="currentColor"/>
-                    </svg>
+                     <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"></svg>
                 </span>
-                <a href="#" class="logo-text">Veridia Vision</a>
+                <a href="{{ url_for('index') }}" class="logo-text">Veridia Vision</a>
             </div>
             <ul class="nav-links">
                 <li><a href="#features" class="nav-link">Features</a></li>
@@ -47,76 +55,44 @@
         </div>
     </nav>
 
-    <!-- Hero Section -->
     <main class="hero-container">
         <div class="hero-content">
             <div class="hero-text">
                 <h1>Smart Recycling,<br>Powered by AI</h1>
                 <p class="hero-description">Veridia Vision uses cutting-edge AI to analyze live camera feeds, providing real-time waste classification for a greener future.</p>
-                <button id="start-detection-button" class="cta-button">
-                    Start Detection
-                </button>
+                <div class="hero-buttons">
+                    <button id="start-detection-button" class="cta-button">
+                        Start Detection
+                    </button>
+                    <button id="test-interface-button" class="cta-button">
+                        Test Interface
+                    </button>
+                </div>
             </div>
         </div>
     </main>
 
-    <!-- Features Section -->
     <section id="features" class="features-section">
-        <div class="section-container">
-            <h2 class="section-title">How It Works</h2>
-            <div class="feature-cards">
-                <div class="feature-card">
-                    <span class="feature-icon material-symbols-rounded">camera</span>
-                    <h3>Point & Scan</h3>
-                    <p>Simply point your camera at waste items and let our AI do the rest. No manual sorting required.</p>
-                </div>
-                <div class="feature-card">
-                    <span class="feature-icon material-symbols-rounded">analytics</span>
-                    <h3>Instant Analysis</h3>
-                    <p>Get immediate identification of objects with classification as recyclable, non-recyclable, or organic waste.</p>
-                </div>
-                <div class="feature-card">
-                    <span class="feature-icon material-symbols-rounded">settings_voice</span>
-                    <h3>Voice Feedback</h3>
-                    <p>Hands-free operation with voice announcements of detection results and classification guidance.</p>
-                </div>
-            </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Contact Section -->
     <section id="contact" class="contact-section">
-        <div class="section-container">
-            <h2 class="section-title">Contact Us</h2>
-            <p class="contact-description">Have questions or feedback about Veridia Vision? Reach out to our team.</p>
-            <div class="contact-cards">
-                <div class="contact-card">
-                    <span class="contact-icon material-symbols-rounded">email</span>
-                    <h3>Email</h3>
-                    <a href="mailto:koustubhnemani@gmail.com" class="contact-link">koustubhnemani@gmail.com</a>
-                </div>
-                <div class="contact-card">
-                    <span class="contact-icon material-symbols-rounded">alternate_email</span>
-                    <h3>Academic</h3>
-                    <a href="mailto:nemas0495@wrdsb.ca" class="contact-link">nemas0495@wrdsb.ca</a>
-                </div>
-            </div>
-        </div>
-    </section>
+       </section>
 
     <footer class="main-footer">
-        <div class="section-container">
-            <p>© 2025 Veridia Vision. All rights reserved.</p>
-        </div>
-    </footer>
+       </footer>
 
     <script>
-        // Get the button
-        var btn = document.getElementById("start-detection-button");
+        const startBtn = document.getElementById("start-detection-button");
+        const testBtn = document.getElementById("test-interface-button"); // Get the new button
 
-        // When the user clicks the button, go directly to camera page
-        btn.onclick = function() {
-            window.location.href = "{{ url_for('camera_page') }}";
+        // Original button goes to the original camera page
+        startBtn.onclick = function() {
+            window.location.href = "{{ url_for('camera_page') }}"; // Links to /camera
+        }
+
+        // New button goes to the new test page route
+        testBtn.onclick = function() {
+            window.location.href = "{{ url_for('camera_test_page') }}"; // Links to /camera_test
         }
     </script>
 </body>
