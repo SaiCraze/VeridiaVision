@@ -24,18 +24,29 @@
     <style>
         .hero-buttons {
             display: flex;
-            gap: var(--space-sm, 16px); /* Use variable from styles.css or default */
-            flex-wrap: wrap;
+            gap: var(--space-sm, 16px); /* Use variable or default */
+            flex-wrap: wrap; /* Allow buttons to wrap */
+            margin-top: var(--space-lg, 32px); /* Add some space above buttons */
         }
+        /* Style for the test button */
         #test-interface-button {
-            background-color: var(--subtle-gray, #2c2c2c);
+            background-color: var(--subtle-gray, #2c2c2c); /* Use subtle color */
             color: var(--primary-green, #00DC82);
             border: 1px solid var(--primary-green, #00DC82);
+            padding: 14px 32px; /* Match cta-button padding if defined */
+            font-size: 1rem; /* Match cta-button font size */
+            font-weight: 600; /* Match cta-button font weight */
+            border-radius: 4px; /* Match cta-button border radius */
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-block;
+            letter-spacing: 0.3px;
+            font-family: var(--font-interface, 'Montserrat'); /* Match cta-button font */
         }
          #test-interface-button:hover {
-             background-color: rgba(0, 220, 130, 0.1);
+             background-color: rgba(0, 220, 130, 0.1); /* Subtle green background */
              box-shadow: 0 4px 12px rgba(0, 220, 130, 0.2);
-             transform: translateY(-2px); /* Keep hover effect consistent */
+             transform: translateY(-2px);
          }
     </style>
 </head>
@@ -44,12 +55,16 @@
         <div class="nav-container">
             <div class="logo-container">
                 <span class="logo-icon">
-                     <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"></svg>
+                    <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="26" height="26" rx="4" fill="#00DC82"/>
+                        <path d="M7 13L11 17L19 9" stroke="#003c1a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
                 </span>
                 <a href="{{ url_for('index') }}" class="logo-text">Veridia Vision</a>
             </div>
             <ul class="nav-links">
                 <li><a href="#features" class="nav-link">Features</a></li>
+                <li><a href="{{ url_for('changelog_page') }}" class="nav-link">Changelog</a></li>
                 <li><a href="#contact" class="nav-link">Contact</a></li>
             </ul>
         </div>
@@ -73,26 +88,68 @@
     </main>
 
     <section id="features" class="features-section">
-        </section>
+        <div class="section-container">
+            <h2 class="section-title">How It Works</h2>
+            <div class="feature-cards">
+                <div class="feature-card">
+                    <span class="feature-icon material-symbols-rounded">camera</span>
+                    <h3>Point & Scan</h3>
+                    <p>Simply point your camera at waste items and let our AI do the rest. No manual sorting required.</p>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-icon material-symbols-rounded">analytics</span>
+                    <h3>Instant Analysis</h3>
+                    <p>Get immediate identification of objects with classification as recyclable, non-recyclable, or organic waste.</p>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-icon material-symbols-rounded">settings_voice</span>
+                    <h3>Voice Feedback</h3>
+                    <p>Hands-free operation with voice announcements of detection results and classification guidance.</p>
+                </div>
+            </div>
+        </div>
+    </section>
 
     <section id="contact" class="contact-section">
-       </section>
+        <div class="section-container">
+            <h2 class="section-title">Contact Us</h2>
+            <p class="contact-description">Have questions or feedback about Veridia Vision? Reach out to our team.</p>
+            <div class="contact-cards">
+                <div class="contact-card">
+                    <span class="contact-icon material-symbols-rounded">email</span>
+                    <h3>Email</h3>
+                    <a href="mailto:koustubhnemani@gmail.com" class="contact-link">koustubhnemani@gmail.com</a>
+                </div>
+                <div class="contact-card">
+                    <span class="contact-icon material-symbols-rounded">alternate_email</span>
+                    <h3>Academic</h3>
+                    <a href="mailto:nemas0495@wrdsb.ca" class="contact-link">nemas0495@wrdsb.ca</a>
+                </div>
+            </div>
+        </div>
+    </section>
 
     <footer class="main-footer">
-       </footer>
+        <div class="section-container">
+            <p>© 2025 Veridia Vision. All rights reserved.</p>
+        </div>
+    </footer>
 
     <script>
+        // Get the buttons
         const startBtn = document.getElementById("start-detection-button");
-        const testBtn = document.getElementById("test-interface-button"); // Get the new button
+        const testBtn = document.getElementById("test-interface-button"); // Get the new test button
 
-        // Original button goes to the original camera page
+        // Original button links to the main camera page
         startBtn.onclick = function() {
-            window.location.href = "{{ url_for('camera_page') }}"; // Links to /camera
+            // Make sure 'camera_page' matches the function name in app.py for the main camera route
+            window.location.href = "{{ url_for('camera_page') }}";
         }
 
-        // New button goes to the new test page route
+        // Test button links to the new test camera page route
         testBtn.onclick = function() {
-            window.location.href = "{{ url_for('camera_test_page') }}"; // Links to /camera_test
+            // Make sure 'camera_test_page' matches the function name in app.py for the test route
+            window.location.href = "{{ url_for('camera_test_page') }}";
         }
     </script>
 </body>
