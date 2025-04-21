@@ -6,21 +6,26 @@ import time
 from flask import Flask, render_template, request, jsonify, redirect, url_for
 from PIL import Image, ImageDraw, ImageFont
 import google.generativeai as genai
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel, ValidationError # Assuming you might use pydantic later, keeping imports
 from dotenv import load_dotenv
 import numpy as np
+import traceback # Import traceback for better error logging
 
 # --- Configuration & Setup ---
 load_dotenv()
 app = Flask(__name__)
-app.secret_key = os.urandom(24)
+app.secret_key = os.urandom(24) # Good practice for sessions, even if not used yet
 
 api_key = os.getenv("GEMINI_API_KEY")
 if not api_key:
     raise ValueError("GEMINI_API_KEY environment variable not set.")
 genai.configure(api_key=api_key)
 
-# --- Data Model ---
+# Model Names
+MODEL_DEFAULT = "gemini-2.0-flash"
+MODEL_TEST = "gemini-2.5-flash-preview-0417" # Use the specific preview model ID
+
+# --- Data Model (Optional but good practice) ---
 class BoundingBox(BaseModel):
     box_2d: list[int]
     label: str
@@ -33,13 +38,40 @@ def draw_bounding_boxes(image_bytes, bounding_boxes):
         img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
         width, height = img.size
         draw = ImageDraw.Draw(img)
-        labels = sorted(list(set(box.label for box in bounding_boxes)))
+
+        # Ensure bounding_boxes is a list of BoundingBox objects if validation happened
+        # If validation didn't happen (e.g., error before validation), handle raw dicts
+        labels = set()
+        valid_box_objects = []
+        if bounding_boxes: # Check if list is not None or empty
+             for box_data in bounding_boxes:
+                 if isinstance(box_data, BoundingBox):
+                     labels.add(box_data.label)
+                     valid_box_objects.append(box_data)
+                 elif isinstance(box_data, dict): # Handle raw dict if validation failed
+                     try:
+                         # Attempt to create a BoundingBox for consistent access
+                         box_obj = BoundingBox(**box_data)
+                         labels.add(box_obj.label)
+                         valid_box_objects.append(box_obj)
+                     except ValidationError:
+                         print(f"Skipping drawing invalid box data: {box_data}")
+                         continue # Skip drawing this box
+                 else:
+                     print(f"Skipping drawing unrecognized box data type: {type(box_data)}")
+                     continue # Skip drawing this box
+
+        if not valid_box_objects:
+             print("No valid boxes to draw.")
+             return image_bytes # Return original if no valid boxes
+
+        sorted_labels = sorted(list(labels))
 
         # Vibrant Neon-like Colors for Dark Theme Boxes
         color_palette = [
             '#00f5d4', '#ff00ff', '#39ff14', '#ffff00', '#00a8ff', '#ff5733', '#f8f8f8'
         ]
-        color_map = {label: color for label, color in zip(labels, color_palette * (len(labels) // len(color_palette) + 1))}
+        color_map = {label: color for label, color in zip(sorted_labels, color_palette * (len(sorted_labels) // len(color_palette) + 1))}
 
         line_width = max(2, min(5, int(width * 0.006)))
         font_size = max(14, min(28, int(width * 0.035)))
@@ -57,52 +89,114 @@ def draw_bounding_boxes(image_bytes, bounding_boxes):
                         font = ImageFont.truetype("DejaVuSans-Bold.ttf", font_size) # Common Linux bold font
                     except IOError:
                         print("Warning: Bold/Regular Arial/DejaVuSans fonts not found. Using default PIL font.")
-                        font = ImageFont.load_default() # Absolute fallback
+                        font = ImageFont.load_default(size=font_size) # Use default PIL font with size attempt
 
-        for box in bounding_boxes:
+        for box in valid_box_objects: # Iterate over validated/parsed objects
             y_min, x_min, y_max, x_max = box.box_2d
             label = box.label
-            object_name = getattr(box, 'object_name', 'Object')
+            object_name = box.object_name # Use the attribute from the Pydantic model
 
             display_label = f"{object_name} ({label})" if object_name and object_name != "Unknown object" else label
 
-            abs_y_min = int(y_min / 1000 * height)
-            abs_x_min = int(x_min / 1000 * width)
-            abs_y_max = int(y_max / 1000 * height)
-            abs_x_max = int(x_max / 1000 * width)
-            color = color_map.get(label, '#f8f8f8')
+            # Ensure coordinates are within image bounds after scaling
+            abs_y_min = max(0, min(height, int(y_min / 1000 * height)))
+            abs_x_min = max(0, min(width, int(x_min / 1000 * width)))
+            abs_y_max = max(0, min(height, int(y_max / 1000 * height)))
+            abs_x_max = max(0, min(width, int(x_max / 1000 * width)))
+
+            # Skip drawing if box dimensions are invalid after clamping
+            if abs_x_min >= abs_x_max or abs_y_min >= abs_y_max:
+                print(f"Skipping drawing invalid box dimensions for {object_name}: [{abs_y_min}, {abs_x_min}, {abs_y_max}, {abs_x_max}]")
+                continue
+
+            color = color_map.get(label, '#f8f8f8') # Default to white/light gray
 
             # Draw Rectangle Outline
             draw.rectangle([(abs_x_min, abs_y_min), (abs_x_max, abs_y_max)], outline=color, width=line_width)
 
             # --- Draw Text Label with Background ---
-            text_position = (abs_x_min + line_width, abs_y_min + line_width)
-            text_bbox = draw.textbbox(text_position, display_label, font=font, spacing=4)
+            # Calculate text size accurately
+            try:
+                 # Use textbbox for potentially better accuracy with different fonts
+                 text_bbox_calc = draw.textbbox((0, 0), display_label, font=font)
+                 text_width = text_bbox_calc[2] - text_bbox_calc[0]
+                 text_height = text_bbox_calc[3] - text_bbox_calc[1]
+            except AttributeError: # Fallback for older PIL/Pillow or default font
+                 text_width, text_height = draw.textlength(display_label, font=font), font_size # Approximate height
+
+            text_x = abs_x_min + line_width
+            text_y = abs_y_min + line_width
 
             bg_x0 = abs_x_min
             bg_y0 = abs_y_min
-            bg_x1 = text_bbox[2] + line_width * 2
-            bg_y1 = text_bbox[3] + line_width
+            # Add padding around text for the background
+            bg_x1 = text_x + text_width + line_width
+            bg_y1 = text_y + text_height + line_width
 
+            # Ensure background doesn't exceed image bounds
             bg_x1 = min(bg_x1, width)
             bg_y1 = min(bg_y1, height)
 
-            draw.rectangle((bg_x0, bg_y0, bg_x1, bg_y1), fill=color)
-            draw.text(text_position, display_label, fill='#1a1a2e', font=font) # Dark text
+            # Ensure background coordinates are valid
+            if bg_x0 < bg_x1 and bg_y0 < bg_y1:
+                 draw.rectangle((bg_x0, bg_y0, bg_x1, bg_y1), fill=color)
+                 draw.text((text_x, text_y), display_label, fill='#1a1a2e', font=font) # Dark text for contrast
+            else:
+                 print(f"Skipping drawing text background for {object_name} due to invalid dimensions.")
+
 
         img_byte_arr = io.BytesIO()
-        img.save(img_byte_arr, format='JPEG', quality=92)
+        img.save(img_byte_arr, format='JPEG', quality=92) # Save as JPEG
         img_byte_arr = img_byte_arr.getvalue()
         return img_byte_arr
     except Exception as e:
         print(f"Error drawing boxes: {e}")
+        traceback.print_exc() # Print stack trace for drawing errors
         return image_bytes # Return original on error
 
 # --- Gemini API Interaction ---
-def classify_waste(image_bytes):
+def classify_waste(image_bytes, use_test_model=False):
+    """
+    Classifies waste items in an image using the Gemini API.
+
+    Args:
+        image_bytes: The image data as bytes.
+        use_test_model: Boolean flag to use the Gemini 2.5 Flash test model.
+
+    Returns:
+        A tuple containing:
+        - A list of validated BoundingBox objects (or None on critical error,
+          or empty list if no objects found/validated).
+        - A status message string.
+    """
+    response = None # Initialize response to None
+    cleaned_response_text = "" # Initialize cleaned text
     try:
-        client = genai.GenerativeModel(model_name="gemini-2.0-flash")
-        image_part = {"mime_type": "image/jpeg", "data": image_bytes}
+        # --- Select Model and Configuration ---
+        if use_test_model:
+            model_name = MODEL_TEST
+            # NOTE: Verify the exact structure for thinking_config with the official SDK docs
+            generation_config = {
+                'response_mime_type': 'application/json',
+                'temperature': 0.3, # Slightly lower temp for more deterministic JSON
+                'thinking_config': {
+                     # Set the thinking budget (tokens) for 2.5 Flash
+                     'thinking_budget': 1024
+                 }
+            }
+            print(f"Using TEST model: {model_name} with thinking budget: 1024")
+        else:
+            model_name = MODEL_DEFAULT
+            generation_config = {
+                 'response_mime_type': 'application/json',
+                 'temperature': 0.3, # Consistent temperature
+            }
+            print(f"Using DEFAULT model: {model_name}")
+
+        # --- Initialize Model and Prepare Request ---
+        client = genai.GenerativeModel(model_name=model_name)
+        image_part = {"mime_type": "image/jpeg", "data": image_bytes} # Assuming JPEG input
+        # System prompt remains the same
         prompt = """
         You are Veridia Vision, a waste classification assistant.
         Analyze the image and identify distinct objects. For each object:
@@ -116,70 +210,118 @@ def classify_waste(image_bytes):
         Return ONLY a valid JSON array of objects. Each object must have the following format:
         {
             "box_2d": [y_min, x_min, y_max, x_max],
-            "label": "recyclable" or "non-recyclable" or "organic",
+            "label": "recyclable" or "non-recyclable" or "organic" or "human",
             "object_name": "name of the specific object"
         }
 
         The coordinates for "box_2d" MUST be normalized integers between 0 and 1000 (inclusive).
+        The "label" MUST be one of: "recyclable", "non-recyclable", "organic", "human".
         If no relevant objects are found, return an empty JSON array: [].
-        Do not include any explanatory text before or after the JSON array.
+        Do not include any explanatory text before or after the JSON array. Adhere strictly to the JSON format.
         """
+
+        # --- Generate Content ---
         response = client.generate_content(
             contents=[prompt, image_part],
-            generation_config={'response_mime_type': 'application/json'},
+            generation_config=generation_config,
+            # Consider adding safety_settings if needed
+            # safety_settings=[...]
         )
-        print(f"Raw Gemini Response Text Length: {len(response.text)}") # Debug length instead of full text if too long
 
-        # Attempt to strip potential markdown/code blocks
-        cleaned_response_text = response.text.strip().strip('```json').strip('```').strip()
+        # --- Process Response ---
+        print(f"Raw Gemini Response Text Length: {len(response.text)}") # Debug length
+
+        # Attempt to strip potential markdown/code blocks more robustly
+        cleaned_response_text = response.text.strip()
+        if cleaned_response_text.startswith("```json"):
+             cleaned_response_text = cleaned_response_text[len("```json"):].strip()
+        if cleaned_response_text.endswith("```"):
+             cleaned_response_text = cleaned_response_text[:-len("```")].strip()
+
         if not cleaned_response_text:
-             print("Gemini returned an empty response after stripping.")
-             return [], "No classifiable objects detected (empty AI response)." # Return empty list and status
+            print("Gemini returned an empty response after stripping.")
+            return [], "No classifiable objects detected (empty AI response)."
 
+        # --- Parse and Validate JSON ---
         response_json = json.loads(cleaned_response_text)
 
-        # Validate structure - ensure it's a list
         if not isinstance(response_json, list):
             print(f"Validation Error: Expected a list, got {type(response_json)}")
-            return None, f"Error: AI response was not a list."
+            # Try to return the raw JSON if it's not a list but might be useful
+            return None, f"Error: AI response was not a list ({type(response_json).__name__})."
 
-        validated_boxes = [BoundingBox(**box) for box in response_json]
 
+        # --- Validate individual items using Pydantic ---
+        validated_boxes = []
+        validation_errors = []
+        for i, box_data in enumerate(response_json):
+             try:
+                 # Add default object_name if missing before validation
+                 if 'object_name' not in box_data:
+                      box_data['object_name'] = 'Unknown object'
+                 validated_box = BoundingBox(**box_data)
+                 # Additional checks
+                 if not (isinstance(validated_box.box_2d, list) and len(validated_box.box_2d) == 4 and all(isinstance(c, int) and 0 <= c <= 1000 for c in validated_box.box_2d)):
+                      raise ValueError("box_2d format invalid (must be list of 4 ints 0-1000)")
+                 if validated_box.label not in ["recyclable", "non-recyclable", "organic", "human"]:
+                      raise ValueError(f"Invalid label '{validated_box.label}'")
+
+                 validated_boxes.append(validated_box)
+             except (ValidationError, ValueError) as e:
+                 print(f"Validation Error for item {i}: {e} - Data: {box_data}")
+                 validation_errors.append(f"Item {i}: {str(e)[:100]}") # Collect errors
+
+        if validation_errors:
+             # Return successfully validated boxes along with error message
+             status_suffix = f" (Validation errors: {'; '.join(validation_errors)})"
+        else:
+             status_suffix = ""
+
+
+        # --- Generate Status Message ---
         num_boxes = len(validated_boxes)
         if num_boxes == 0:
-            status = "No classifiable objects detected."
+            status = "No valid objects detected." + status_suffix
         elif num_boxes == 1:
             box = validated_boxes[0]
-            object_name = getattr(box, 'object_name', 'item')
-            status = f"Detected 1 {box.label} item: {object_name}."
+            object_name = box.object_name
+            status = f"Detected 1 {box.label} item: {object_name}." + status_suffix
         else:
             counts = {}
             object_names = []
             for box in validated_boxes:
                 counts[box.label] = counts.get(box.label, 0) + 1
-                object_names.append(getattr(box, 'object_name', 'item'))
+                object_names.append(box.object_name)
 
             status_parts = [f"{count} {label}" for label, count in counts.items()]
             object_list = ", ".join(object_names)
-            status = f"Detected {num_boxes} items: {', '.join(status_parts)}. Objects: {object_list}."
+            status = f"Detected {num_boxes} items: {', '.join(status_parts)}. Objects: {object_list}." + status_suffix
 
-        return validated_boxes, status
+        return validated_boxes, status # Return potentially partial list and status
 
+    # --- Exception Handling ---
     except json.JSONDecodeError as e:
         print(f"Error decoding JSON from Gemini response: {e}")
-        print(f"Response text that failed: '{cleaned_response_text[:500]}...'") # Log beginning of failing text
+        print(f"Response text that failed: '{cleaned_response_text[:500]}...'")
         return None, f"Error: Could not parse AI response. {str(e)[:100]}"
-    except ValidationError as e:
-        print(f"Validation Error processing Gemini response: {e}")
-        return None, f"Error: AI response format incorrect. {str(e)[:100]}"
+    # Keep Pydantic validation error separate if needed, though handled above now
+    # except ValidationError as e:
+    #     print(f"Validation Error processing Gemini response: {e}")
+    #     return None, f"Error: AI response format incorrect. {str(e)[:100]}"
     except Exception as e:
         print(f"Error during Gemini API call or processing: {e}")
-        # Attempt to get more specific feedback if available
-        error_details = "No specific details available."
-        if hasattr(response, 'prompt_feedback'):
-             error_details = f"Prompt Feedback: {response.prompt_feedback}"
-        elif hasattr(response, 'error'):
-             error_details = f"Response Error Field: {response.error}"
+        traceback.print_exc() # Print full stack trace for unexpected errors
+        error_details = f"Type: {type(e).__name__}"
+        # Check for specific Gemini API feedback if the 'response' object exists
+        if response and hasattr(response, 'prompt_feedback'):
+             try:
+                  # Accessing prompt_feedback might raise an error itself if generation failed early
+                  error_details += f". Prompt Feedback: {response.prompt_feedback}"
+             except Exception as fb_e:
+                  print(f"Could not access prompt_feedback: {fb_e}")
+        elif response and hasattr(response, 'error'): # Check if response itself indicates an error
+             error_details += f". Response Error Field: {response.error}"
+
         print(f"API Error Details: {error_details}")
         return None, f"Error: AI communication failed. {str(e)[:100]}"
 
@@ -187,50 +329,75 @@ def classify_waste(image_bytes):
 # --- Flask Routes ---
 @app.route('/')
 def index():
-    return render_template('index.html')
+    # Renders the main page (e.g., index.html or camera.html)
+    # This page's JS should NOT send the use_test_model flag
+    # Decide which template is your main entry point
+    return render_template('camera.html') # Or index.html if that's preferred
 
-@app.route('/camera')
-def camera_page():
-    return render_template('camera.html')
+@app.route('/camera_test')
+def camera_test_page():
+    # Renders the test page (templates/camera_test.html)
+    # This page's JS WILL send the use_test_model flag
+    return render_template('camera_test.html')
 
 @app.route('/process_frame', methods=['POST'])
 def process_frame():
+    """Processes a single frame (image) from the frontend."""
     try:
         data = request.get_json()
         if not data or 'image_data' not in data:
+            print("Error: Request missing image_data field.")
             return jsonify({"error": "Missing image_data", "status": "Client error: No image data received."}), 400
 
         image_data_url = data['image_data']
+        # Determine if the test model should be used based on the flag from frontend
+        use_test_model_flag = data.get('use_test_model', False) # Default to False
+        print(f"Received process_frame request. use_test_model={use_test_model_flag}")
+
+
+        # --- Decode Image ---
         try:
+            # Split header (e.g., "data:image/jpeg;base64,") from encoded data
             header, encoded = image_data_url.split(",", 1)
             image_bytes = base64.b64decode(encoded)
-            mime_type = header.split(':')[1].split(';')[0]
-            if mime_type not in ['image/jpeg', 'image/png', 'image/webp']:
-                 print(f"Warning: Received unexpected mime type: {mime_type}. Processing as JPEG.")
-                 mime_type = 'image/jpeg' # Standardize for processing
+            # Extract mime type (make robust)
+            mime_type = 'image/jpeg' # Default assumption
+            if ':' in header and ';' in header:
+                 mime_part = header.split(':')[1].split(';')[0]
+                 if '/' in mime_part: # Basic check for valid mime type format
+                      mime_type = mime_part
+            print(f"Decoded image with assumed mime type: {mime_type}")
+            # Optional: Add stricter validation if needed, e.g., check allowed types
+            # if mime_type not in ['image/jpeg', 'image/png', 'image/webp']:
+            #     print(f"Warning: Received unexpected mime type: {mime_type}. Processing as JPEG.")
+            #     mime_type = 'image/jpeg' # Standardize
+
         except (ValueError, base64.binascii.Error, IndexError) as e:
-             print(f"Base64 decoding or header parsing error: {e}")
-             return jsonify({"error": "Invalid image data format", "status": "Client error: Bad image format."}), 400
+            print(f"Base64 decoding or header parsing error: {e}")
+            return jsonify({"error": "Invalid image data format", "status": "Client error: Bad image format."}), 400
 
-        # --- Processing ---
+
+        # --- Processing with selected model ---
         start_time = time.time()
-        bounding_boxes, status_message = classify_waste(image_bytes)
+        # Pass the flag to the classification function
+        bounding_boxes, status_message = classify_waste(image_bytes, use_test_model=use_test_model_flag)
         ai_time = time.time() - start_time
-        print(f"Gemini classification took {ai_time:.2f} seconds.")
+        print(f"Gemini classification took {ai_time:.2f} seconds. Status: {status_message}")
 
+
+        # --- Draw Boxes and Prepare Response ---
         processed_image_bytes = image_bytes # Default to original
         boxes_found = False
         object_details_list = []
 
         if bounding_boxes is None:
-            # Error already captured in status_message by classify_waste
+            # Error occurred in classify_waste, status_message has details
             print(f"classify_waste returned None. Status: {status_message}")
-            pass # status_message already contains the error description
         elif not bounding_boxes:
-            # No objects found, status_message reflects this
-            print("classify_waste returned empty list. No objects detected.")
-            pass
+            # No objects found or validated
+            print("classify_waste returned empty or invalid list. No objects detected/drawn.")
         else:
+            # Attempt to draw boxes only if we got valid data
             boxes_found = True
             start_draw_time = time.time()
             drawn_bytes = draw_bounding_boxes(image_bytes, bounding_boxes)
@@ -238,37 +405,41 @@ def process_frame():
             print(f"Drawing boxes took {draw_time:.2f} seconds.")
 
             if drawn_bytes is not None and drawn_bytes != image_bytes:
-                 processed_image_bytes = drawn_bytes
-            elif drawn_bytes is None:
-                 print("Drawing boxes failed, returning original image.")
-                 status_message += " (Error drawing boxes)"
+                processed_image_bytes = drawn_bytes
+            elif drawn_bytes is None: # Check if drawing explicitly failed
+                print("Drawing boxes failed, returning original image.")
+                status_message += " (Error drawing boxes)"
+            # else: drawing might have returned original image due to no valid boxes
 
+            # Prepare details list from the (potentially filtered) bounding_boxes
             object_details_list = [
-                {"name": getattr(box, 'object_name', 'Unknown'), "classification": box.label}
-                for box in bounding_boxes
+                 {"name": box.object_name, "classification": box.label}
+                 for box in bounding_boxes # Use the list returned by classify_waste
             ]
 
-        # --- Prepare Response ---
+
+        # --- Prepare Response JSON ---
         processed_image_base64 = base64.b64encode(processed_image_bytes).decode('utf-8')
-        # Use the potentially corrected mime_type here
+        # Use the determined mime_type for the result data URL
         result_image_data_url = f"data:{mime_type};base64,{processed_image_base64}"
 
         return jsonify({
             "status": status_message,
             "processed_image_data": result_image_data_url,
-            "boxes_found": boxes_found,
-            "object_details": object_details_list
+            "boxes_found": boxes_found, # Indicates if boxes were *attempted* to be drawn
+            "object_details": object_details_list # List of detected objects
         })
 
     except Exception as e:
         print(f"Critical Error in /process_frame: {e}")
-        import traceback
-        traceback.print_exc() # Print full stack trace for debugging server errors
+        traceback.print_exc() # Print full stack trace
         return jsonify({"error": "An internal server error occurred", "status": "Server error during processing."}), 500
 
 
 # --- Run ---
 if __name__ == '__main__':
-    # Use waitresses or gunicorn for production instead of Flask's debug server
+    # Use waitress or gunicorn for production instead of Flask's debug server
     # For development:
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    # Set debug=False if deploying, True for local development only
+    # Host 0.0.0.0 makes it accessible on your network, use 127.0.0.1 for local only
+    app.run(debug=False, host='0.0.0.0', port=int(os.environ.get("PORT", 5000)))
