@@ -329,15 +329,23 @@ def classify_waste(image_bytes, use_test_model=False):
 # --- Flask Routes ---
 @app.route('/')
 def index():
-    # Renders the main page (e.g., index.html or camera.html)
+    # Renders the main landing page (index.html)
     # This page's JS should NOT send the use_test_model flag
-    # Decide which template is your main entry point
-    return render_template('camera.html') # Or index.html if that's preferred
+    print("Serving index.html for root route /") # Add log
+    return render_template('index.html') # CHANGED TO INDEX.HTML
+
+@app.route('/camera')
+def camera_page():
+    # Renders the main camera page (templates/camera.html)
+    # This page's JS should NOT send the use_test_model flag
+    print("Serving camera.html for route /camera") # Add log
+    return render_template('camera.html')
 
 @app.route('/camera_test')
 def camera_test_page():
     # Renders the test page (templates/camera_test.html)
     # This page's JS WILL send the use_test_model flag
+    print("Serving camera_test.html for route /camera_test") # Add log
     return render_template('camera_test.html')
 
 @app.route('/process_frame', methods=['POST'])
@@ -443,3 +451,4 @@ if __name__ == '__main__':
     # Set debug=False if deploying, True for local development only
     # Host 0.0.0.0 makes it accessible on your network, use 127.0.0.1 for local only
     app.run(debug=False, host='0.0.0.0', port=int(os.environ.get("PORT", 5000)))
+
