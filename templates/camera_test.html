@@ -1,404 +1,420 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
+<html lang="en" class=""> <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Veridia Vision - Smart Detection</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>♻️</text></svg>">
-
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZDVYQL279E"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-ZDVYQL279E');
-    </script>
-
+    <title>Veridia Vision - Gemini 2.5 Flash Testing (Camera)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@400;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
-
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-</head>
-<body class="app-body">
-
-    <div id="camera-app-container">
-        <header id="app-header">
-             <div class="logo-container">
-                 <span class="logo-icon">
-                      <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 2C10.4288 2 7.9154 2.76244 5.77759 4.1909C3.63978 5.61935 1.97351 7.64968 0.991826 10.0251C0.0101517 12.4006 -0.252401 15.0144 0.250707 17.5362C0.753815 20.0579 1.98979 22.3743 3.80762 24.1921C5.62545 26.01 7.94189 27.2459 10.4636 27.749C12.9854 28.2521 15.5992 27.9895 17.9747 27.0078C20.3502 26.0262 22.3805 24.3599 23.809 22.2221C25.2374 20.0843 25.9999 17.5709 25.9999 14.9997C25.9999 11.4869 24.5777 8.10073 22.0498 5.57285C19.5219 3.04497 16.1357 1.62275 12.6229 1.62275L13 2Z" fill="#00DC82"/><path d="M16.6183 7.72656C16.9121 7.72656 17.193 7.84102 17.4018 8.04988C17.6107 8.25873 17.7251 8.53962 17.7251 8.83344V11.0472C18.8078 11.2852 19.787 11.8768 20.5051 12.7328C21.2232 13.5888 21.6341 14.6612 21.6736 15.78C21.713 16.8988 21.3786 18.0004 20.7207 18.9107C20.0627 19.8211 19.1207 20.487 18.0566 20.7978C16.9924 21.1086 15.8558 21.0442 14.8335 20.6148C13.8113 20.1855 12.9638 19.4167 12.4369 18.4371C11.91 17.4575 11.7326 16.327 11.9343 15.2329C12.136 14.1388 12.7051 13.1462 13.5487 12.4145C13.6158 12.3533 13.6971 12.3086 13.7861 12.2848C13.875 12.2611 13.9686 12.2591 14.0584 12.279C14.1482 12.2989 14.2313 12.3401 14.3007 12.3985C14.3701 12.4569 14.4237 12.5307 14.4565 12.6135C14.4893 12.6963 14.5 12.7853 14.488 12.8724C14.4759 12.9594 14.4415 13.0416 14.3878 13.1116C14.334 13.1815 14.2627 13.2371 14.1801 13.2731C14.0975 13.3091 14.0064 13.3245 13.9164 13.318C13.1855 13.897 12.6909 14.7381 12.543 15.6746C12.3951 16.6111 12.6049 17.5705 13.1318 18.3577C13.6586 19.1449 14.4653 19.7056 15.3871 19.9356C16.3089 20.1656 17.2845 20.0478 18.1183 19.6051C18.9521 19.1624 19.5871 18.4291 19.9105 17.5407C20.2339 16.6523 20.2211 15.6743 19.8745 14.7947C19.5279 13.9151 18.8731 13.1981 18.0282 12.7764C17.1834 12.3546 16.2069 12.2588 15.2943 12.5082V15.1671C15.2943 15.4609 15.1798 15.7418 14.971 15.9507C14.7621 16.1595 14.4812 16.274 14.1874 16.274C13.8936 16.274 13.6127 16.1595 13.4038 15.9507C13.195 15.7418 13.0805 15.4609 13.0805 15.1671V8.83344C13.0805 8.53962 13.195 8.25873 13.4038 8.04988C13.6127 7.84102 13.8936 7.72656 14.1874 7.72656H16.6183Z" fill="#003c1a"/></svg>
-                 </span>
-                 <a href="{{ url_for('index') }}" class="logo-text">Veridia Vision</a>
-             </div>
-             <ul class="nav-links">
-                 <li><a href="{{ url_for('index') }}" class="nav-link">Home</a></li>
-                 <li><a href="{{ url_for('changelog_page') }}" class="nav-link">Changelog</a></li>
-                 <li><a href="{{ url_for('index') }}#contact" class="nav-link">Contact</a></li>
-             </ul>
-            <div class="controls-header">
-                 <div class="control-group">
-                     <span class="material-symbols-rounded">volume_up</span>
-                     <label for="tts-toggle">Voice</label>
-                     <label class="switch">
-                         <input type="checkbox" id="tts-toggle" checked>
-                         <span class="slider round"></span>
-                     </label>
-                </div>
-                <div class="control-group">
-                    <span class="material-symbols-rounded">cameraswitch</span>
-                    <label for="camera-select">Camera</label>
-                    <select id="camera-select" class="camera-dropdown" disabled>
-                        <option>Loading...</option>
-                    </select>
-                </div>
-            </div>
-             <button id="home-button" class="app-button" title="Return to Home">
-                 <span class="material-symbols-rounded">home</span>
-                 <span>Home</span>
-             </button>
-        </header>
-
-        <main id="main-content">
-            <div id="camera-view-wrapper">
-                 <div id="camera-container" class="media-container">
-                     <video id="video-feed" autoplay playsinline muted></video>
-                     <div id="processing-overlay" class="overlay hidden">
-                         <div class="spinner"></div>
-                         <span>Analyzing...</span>
-                     </div>
-                     <div id="error-overlay" class="overlay error-msg hidden">
-                         <span class="material-symbols-rounded">error</span>
-                         <span id="error-text">Error accessing camera.</span>
-                     </div>
-                 </div>
-            </div>
-
-            <aside id="prediction-sidebar">
-                <div class="sidebar-header">
-                    <span class="material-symbols-rounded">label</span>
-                    <h2>Detected Objects</h2>
-                </div>
-                <div id="prediction-content" class="sidebar-content">
-                    <p class="placeholder-text">Initializing...</p>
-                </div>
-                <div class="sidebar-footer">
-                    <button id="stop-detection-button" class="action-button stop-button hidden">
-                        <span class="material-symbols-rounded">stop_circle</span>
-                        <span>Stop & Exit</span>
-                    </button>
-                </div>
-            </aside>
-        </main>
-    </div>
-
-    <canvas id="canvas" style="display: none;"></canvas>
-
-    <script>
-        // --- DOM Elements ---
-        const video = document.getElementById('video-feed');
-        const canvas = document.getElementById('canvas');
-        const context = canvas.getContext('2d');
-        const cameraContainer = document.getElementById('camera-container');
-        const predictionContent = document.getElementById('prediction-content');
-        const stopDetectionButton = document.getElementById('stop-detection-button');
-        const ttsToggle = document.getElementById('tts-toggle');
-        const cameraSelect = document.getElementById('camera-select');
-        const processingOverlay = document.getElementById('processing-overlay');
-        const errorOverlay = document.getElementById('error-overlay');
-        const errorText = document.getElementById('error-text');
-        const homeButton = document.getElementById('home-button');
-
-        // --- State & Config ---
-        let stream = null;
-        let captureInterval = null;
-        let resultTimeout = null;
-        let isProcessing = false;
-        let ttsEnabled = true;
-        let currentDeviceId = null;
-        let availableCameras = [];
-        let appInitialized = false;
-
-        const CAPTURE_INTERVAL_MS = 7000;
-        const RESULT_DISPLAY_MS = 3000;
-        const VIDEO_CONSTRAINTS = {
-            video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'environment' },
-            audio: false
-        };
-
-        // --- Text-to-Speech ---
-        const synth = window.speechSynthesis;
-        let voices = [];
-        function populateVoiceList() {
-            if (typeof speechSynthesis === 'undefined' || !synth) return;
-            try {
-                 voices = synth.getVoices().filter(voice => voice.lang.startsWith('en'));
-                 console.log("Available English voices:", voices.length);
-            } catch (e) { console.error("Error getting voices:", e); voices = []; }
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Apply Inter font globally */
+        body {
+            font-family: 'Inter', sans-serif;
+            /* Smooth transition for background color */
+            transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
         }
-        if (typeof speechSynthesis !== 'undefined' && speechSynthesis.onvoiceschanged !== undefined) {
-             speechSynthesis.onvoiceschanged = populateVoiceList;
+        /* Style video element */
+        video {
+            display: block; /* Prevent extra space below video */
+            width: 100%;   /* Make video fill container width */
+            height: auto;  /* Maintain aspect ratio */
+            transform: scaleX(-1); /* Mirror the video feed */
+            /* Lighter background for light mode */
+            background-color: #e5e7eb; /* bg-gray-200 */
+            transition: background-color 0.3s ease-in-out;
         }
-        populateVoiceList();
-        if (voices.length === 0 && typeof speechSynthesis !== 'undefined') {
-             console.log("Attempting delayed voice loading...");
-             let voiceLoadAttempts = 0;
-             const voiceLoadInterval = setInterval(() => {
-                 populateVoiceList();
-                 voiceLoadAttempts++;
-                 if (voices.length > 0 || voiceLoadAttempts > 10) {
-                      clearInterval(voiceLoadInterval);
-                      console.log(voices.length > 0 ? "Voices loaded after delay." : "Voices did not load after delay.");
-                 }
-             }, 200);
+        .dark video {
+             background-color: #000000; /* black */
         }
 
-        function speak(text) {
-            console.log("Speak function called with text:", text);
-            if (!ttsEnabled || !synth || !text) {
-                console.log(`TTS skipped: Enabled=${ttsEnabled}, Synth=${!!synth}, Text=${!!text}`);
-                return;
-            }
-            if (synth.speaking) { console.log("Cancelling previous speech."); synth.cancel(); }
-            setTimeout(() => {
-                 try {
-                      const utterance = new SpeechSynthesisUtterance(text);
-                      utterance.onerror = (event) => { console.error('SpeechSynthesisUtterance.onerror', event); };
-                      let preferredVoice = voices.find(v => v.name.includes('Google US English') && v.localService) || voices.find(v => v.lang === 'en-US' && v.localService) || voices.find(v => v.name.includes('Google US English')) || voices.find(v => v.lang === 'en-US') || voices.find(v => v.default);
-                      if (preferredVoice) utterance.voice = preferredVoice;
-                      utterance.pitch = 1; utterance.rate = 1.1;
-                      console.log("Attempting synth.speak for:", text);
-                      synth.speak(utterance);
-                 } catch (e) { console.error("Error initiating speech synthesis:", e); }
-            }, 50);
+        /* Add a subtle animation for the loading indicator */
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .spinner {
+            border: 2px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #3b82f6; /* blue-500 */
+            border-radius: 50%;
+            width: 1rem;
+            height: 1rem;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 0.5rem;
+            vertical-align: middle;
+        }
+        .dark .spinner {
+             border: 2px solid rgba(255, 255, 255, 0.1);
+             border-left-color: #60a5fa; /* blue-400 */
         }
 
-        // --- UI Updates ---
-        function showProcessing(show, message = "Analyzing...") {
-             processingOverlay.classList.toggle('hidden', !show);
-             const overlayText = processingOverlay.querySelector('span');
-             if(overlayText) overlayText.textContent = message;
-             isProcessing = show;
-        }
-        function showError(message, consoleError = null) {
-             if (consoleError) console.error("UI Error:", message, consoleError); else console.error("UI Error:", message);
-             errorText.textContent = message;
-             errorOverlay.classList.remove('hidden');
-             if (errorOverlay.timeoutId) clearTimeout(errorOverlay.timeoutId);
-             errorOverlay.timeoutId = setTimeout(() => { errorOverlay.classList.add('hidden'); errorOverlay.timeoutId = null; }, 5000);
-        }
-        function updatePredictionContent(htmlContent) {
-             predictionContent.innerHTML = htmlContent;
-             const placeholder = predictionContent.querySelector('.placeholder-text');
-             if (placeholder) placeholder.remove();
-        }
-        function resetPredictionContent(message = 'Status will appear here.') {
-            console.log("Resetting prediction content to:", message); // Debug log
-            predictionContent.innerHTML = `<p class="placeholder-text">${message}</p>`;
+        /* Hide the canvas used for snapshots */
+        #snapshotCanvas {
+            display: none;
         }
 
-        // --- Camera & Devices ---
-        async function getCameraDevices() {
-             console.log("getCameraDevices: Starting...");
-             cameraSelect.disabled = true; cameraSelect.innerHTML = '<option>Loading...</option>';
-             try {
-                await navigator.mediaDevices.getUserMedia({ video: true });
-                const devices = await navigator.mediaDevices.enumerateDevices();
-                availableCameras = devices.filter(device => device.kind === 'videoinput');
-                cameraSelect.innerHTML = '';
-                if (availableCameras.length === 0) { showError("No video cameras found."); return false; }
-                let selectedDeviceId = null;
-                availableCameras.forEach((camera, index) => {
-                     const option = document.createElement('option');
-                     option.value = camera.deviceId; option.textContent = camera.label || `Camera ${index + 1}`;
-                     if (!selectedDeviceId && camera.label && (camera.label.toLowerCase().includes('back') || camera.label.toLowerCase().includes('environment'))) { option.selected = true; selectedDeviceId = camera.deviceId; }
-                     cameraSelect.appendChild(option);
-                });
-                if (!selectedDeviceId) { selectedDeviceId = availableCameras[0].deviceId; cameraSelect.value = selectedDeviceId; }
-                currentDeviceId = selectedDeviceId; cameraSelect.disabled = false;
-                cameraSelect.removeEventListener('change', handleCameraChange); cameraSelect.addEventListener('change', handleCameraChange);
-                console.log("getCameraDevices: Success."); return true;
-             } catch (err) {
-                 console.error("Error getting camera devices:", err);
-                 let msg = `Camera Error: ${err.name}.`; if (err.name === "NotAllowedError") msg = "Camera permission denied."; else if (err.name === "NotFoundError") msg = "No camera found.";
-                 showError(msg, err); cameraSelect.innerHTML = '<option>Camera Error</option>'; return false;
-             }
+        /* --- Dark Mode Toggle Styles --- */
+        .theme-switch-wrapper {
+            display: flex;
+            align-items: center;
         }
-
-        async function startCameraStream() {
-             console.log("startCameraStream: Attempting...");
-             stopCameraStream(); errorOverlay.classList.add('hidden');
-             const constraints = JSON.parse(JSON.stringify(VIDEO_CONSTRAINTS));
-             if (currentDeviceId) { constraints.video.deviceId = { exact: currentDeviceId }; delete constraints.video.facingMode; }
-             try {
-                 stream = await navigator.mediaDevices.getUserMedia(constraints);
-                 video.srcObject = stream;
-                 video.muted = true;
-                 await video.play();
-                 await new Promise((resolve, reject) => {
-                     // Resolve immediately if metadata is already available
-                     if (video.readyState >= HTMLMediaElement.HAVE_METADATA) {
-                         resolve();
-                     } else {
-                         video.addEventListener('loadedmetadata', resolve, { once: true });
-                         video.addEventListener('error', reject, { once: true });
-                     }
-                 });
-                 // Check for valid dimensions before setting canvas size
-                 if (video.videoWidth > 0 && video.videoHeight > 0) {
-                    canvas.width = video.videoWidth; canvas.height = video.videoHeight;
-                 } else {
-                    console.warn("Video dimensions are zero after loading metadata.");
-                    // Optionally attempt again or throw an error
-                 }
-                 console.log(`startCameraStream: Success (${canvas.width}x${canvas.height})`);
-                 cameraContainer.classList.remove('hidden');
-                 return true;
-             } catch (err) {
-                 console.error("Error starting camera stream:", err);
-                 stream = null; video.srcObject = null;
-                 let msg = `Camera Error: ${err.name}.`; showError(msg, err);
-                 cameraContainer.classList.add('hidden');
-                 return false;
-             }
+        .theme-switch {
+            display: inline-block;
+            height: 26px; /* Height of the switch */
+            position: relative;
+            width: 50px; /* Width of the switch */
+            flex-shrink: 0; /* Prevent switch from shrinking in flex container */
         }
-
-        function stopCameraStream() { if (stream) { console.log("Stopping stream."); stream.getTracks().forEach(t => t.stop()); stream = null; video.srcObject = null; } }
-
-        async function handleCameraChange() {
-             const selectedId = cameraSelect.value; if (selectedId === currentDeviceId || !selectedId) return;
-             console.log("Camera changed to:", selectedId); currentDeviceId = selectedId;
-             if (captureInterval) { console.log("Restarting scan for new camera..."); showProcessing(true, "Switching..."); clearInterval(captureInterval); captureInterval = null; clearTimeout(resultTimeout); resultTimeout = null; await startScanning(); showProcessing(false); }
-             else { console.log("Previewing new camera..."); showProcessing(true, "Switching..."); const success = await startCameraStream(); showProcessing(false); resetPredictionContent(success ? "Camera ready." : "Failed camera switch."); }
+        .theme-switch input {
+            display: none; /* Hide the default checkbox */
         }
-
-        // --- Scanning Logic ---
-        async function startScanning() {
-            console.log("startScanning: Initiated.");
-            if (!appInitialized) { console.warn("App not initialized."); return; }
-            if (captureInterval) { console.warn("Scan already active."); clearInterval(captureInterval); } // Clear old one just in case
-            clearTimeout(resultTimeout); resultTimeout = null;
-
-            resetPredictionContent('Starting camera...'); // <<< UI Update 1
-            showProcessing(true, "Starting camera..."); removeStopButton();
-
-            const cameraStarted = await startCameraStream();
-            showProcessing(false); // Hide overlay once attempt finishes
-
-            if (!cameraStarted) {
-                 console.error("Scan aborted: Camera failed to start.");
-                 resetPredictionContent('Camera failed to start.'); // <<< UI Update 2 (on failure)
-                 return; // Stop
-            }
-
-            // *** THE FIX: Update status immediately after camera succeeds ***
-            console.log("Camera started successfully.");
-            resetPredictionContent('Camera ready. Scanning...'); // <<< UI Update 2 (on success)
-            createStopButton(); // Show stop button
-
-            // --- Start Capture Loop ---
-            console.log("Scheduling first capture...");
-            // Use timeout for first capture to allow UI to update
-            setTimeout(() => {
-                if (!stream || !stream.active) { console.warn("Stream stopped before first capture."); stopAndExit("Stream lost before first scan"); return; }
-                console.log("Performing first capture.");
-                captureAndProcessFrame(); // Initial capture
-
-                // Set interval only *after* the first attempt
-                if (captureInterval) clearInterval(captureInterval); // Clear again for safety
-                captureInterval = setInterval(() => {
-                    if (!stream || !stream.active) { console.warn("Stream lost. Stopping interval."); clearInterval(captureInterval); captureInterval = null; stopAndExit("Stream lost"); return; }
-                    captureAndProcessFrame();
-                }, CAPTURE_INTERVAL_MS);
-                console.log("Capture interval started (ID:", captureInterval, ")");
-            }, 500); // Short delay (500ms) before first capture
+        .slider {
+            background-color: #cbd5e1; /* gray-300 */
+            bottom: 0;
+            cursor: pointer;
+            left: 0;
+            position: absolute;
+            right: 0;
+            top: 0;
+            transition: background-color 0.3s ease-in-out;
+            border-radius: 26px; /* Fully rounded */
+            display: flex;
+            align-items: center;
+            justify-content: space-between; /* Distribute icons */
+            padding: 0 4px; /* Padding for icons */
         }
-
-
-        function stopAndExit(reason = "User initiated") {
-            console.log(`stopAndExit: Stopping (${reason}).`);
-            clearInterval(captureInterval); captureInterval = null; clearTimeout(resultTimeout); resultTimeout = null;
-            stopCameraStream(); if (synth && synth.speaking) synth.cancel(); removeStopButton();
-            resetPredictionContent('Exiting...');
-            window.location.href = "{{ url_for('index') }}";
+        .slider:before { /* This is the sliding circle */
+            background-color: #ffffff; /* white */
+            bottom: 3px; /* Position inside the slider */
+            content: "";
+            height: 20px; /* Size of the circle */
+            left: 3px; /* Start position */
+            position: absolute;
+            transition: transform 0.3s ease-in-out;
+            width: 20px; /* Size of the circle */
+            border-radius: 50%;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
         }
-
-        async function captureAndProcessFrame() {
-             if (!stream || !stream.active) { console.warn("Capture skipped: Stream inactive."); return; }
-             if (isProcessing || document.hidden) { console.log("Capture skipped: Processing or hidden"); return; }
-
-             console.log("Capturing frame...");
-             showProcessing(true, "Analyzing..."); clearTimeout(resultTimeout);
-
-             try {
-                 if (canvas.width <= 0 || canvas.height <= 0) { throw new Error("Invalid canvas dimensions"); } // Prevent drawing on 0x0 canvas
-                 context.drawImage(video, 0, 0, canvas.width, canvas.height);
-                 const imageDataUrl = canvas.toDataURL('image/jpeg', 0.85);
-
-                 const response = await fetch('/process_frame', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ image_data: imageDataUrl }) });
-                 if (!response.ok) { let msg = `Server error: ${response.status}`; try { const err = await response.json(); msg = err?.status || err?.error || msg; } catch {} throw new Error(msg); }
-                 const result = await response.json();
-                 console.log("Result received:", result);
-                 showProcessing(false); // Hide overlay FIRST
-
-                 // --- Update Sidebar ---
-                 let sidebarHtml = '';
-                 if (result.error || !result.status) { sidebarHtml = `<p class="error-text">${result.error || result.status || "Unknown server error"}</p>`; console.error("Error from server:", result.error || result.status); }
-                 else if (!result.boxes_found || !Array.isArray(result.object_details) || result.object_details.length === 0) { sidebarHtml = '<p class="placeholder-text">No objects detected.</p>'; }
-                 else {
-                     sidebarHtml = '<ul class="prediction-list">';
-                     result.object_details.forEach(item => { sidebarHtml += `<li class="prediction-item object-item"><span class="material-symbols-rounded item-icon">label</span><span class="object-name">${item.name}</span><span class="object-classification">(${item.classification})</span></li>`; });
-                     sidebarHtml += '</ul>';
-                 }
-                 updatePredictionContent(sidebarHtml); // Update sidebar
-
-                 // --- Speak Status ---
-                 if(result.status && !result.error) { // Only speak non-error status
-                    console.log("Attempting to speak:", result.status);
-                    speak(result.status);
-                 } else {
-                    console.log("Skipping speak for error or missing status.");
-                 }
-
-             } catch (error) {
-                 console.error('Error processing frame:', error); showProcessing(false);
-                 let msg = error.message.includes('fetch') ? "Network Error." : "Analysis Failed."; updatePredictionContent(`<p class="error-text">${msg}</p>`);
-             }
+        input:checked + .slider {
+            background-color: #4f46e5; /* indigo-600 */
+        }
+        .dark .slider {
+             background-color: #374151; /* gray-700 */
+        }
+         .dark input:checked + .slider {
+            background-color: #4338ca; /* indigo-700 */
+        }
+         .dark .slider:before {
+             background-color: #e5e7eb; /* gray-200 */
          }
 
-
-        // --- Event Listeners ---
-        stopDetectionButton.addEventListener('click', () => stopAndExit("Stop button"));
-        ttsToggle.addEventListener('change', () => { ttsEnabled = ttsToggle.checked; console.log("TTS Enabled:", ttsEnabled); if (ttsEnabled) speak("Voice enabled."); else if (synth && synth.speaking) synth.cancel(); });
-        homeButton.addEventListener('click', () => stopAndExit("Home button"));
-        document.addEventListener('visibilitychange', () => console.log("Visibility:", document.hidden ? "hidden" : "visible"));
-        window.addEventListener('beforeunload', () => stopAndExit("Page unload"));
-
-        // --- Initialization ---
-        async function initializeApp() {
-             if (appInitialized) return; appInitialized = true;
-             console.log("initializeApp: Starting..."); ttsToggle.checked = ttsEnabled;
-             resetPredictionContent('Initializing...'); // <<< UI Update 1
-             const camerasReady = await getCameraDevices();
-             if (!camerasReady) { resetPredictionContent('Camera initialization failed.'); return; } // <<< UI Update on failure
-             console.log("initializeApp: Cameras ready, auto-starting scan...");
-             await startScanning(); // Start scan automatically
+        input:checked + .slider:before {
+            transform: translateX(24px); /* Move circle to the right */
         }
 
-        // --- Utility Functions for Buttons ---
-        function createStopButton() { if (stopDetectionButton) stopDetectionButton.classList.remove('hidden'); }
-        function removeStopButton() { if (stopDetectionButton) stopDetectionButton.classList.add('hidden'); }
+        /* Icons inside the slider */
+        .slider svg {
+            height: 16px;
+            width: 16px;
+            transition: opacity 0.3s ease-in-out;
+        }
+        .sun-icon {
+            color: #f59e0b; /* amber-500 */
+            opacity: 1;
+        }
+        .moon-icon {
+             color: #93c5fd; /* blue-300 */
+             opacity: 0;
+        }
+        input:checked + .slider .sun-icon {
+            opacity: 0;
+        }
+         input:checked + .slider .moon-icon {
+            opacity: 1;
+        }
 
-        // --- Start the App ---
-        initializeApp();
+         /* Smooth transition for main container */
+         .main-container {
+             transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+         }
+         /* Style for processed image display */
+         #processedImage {
+             max-width: 100%;
+             max-height: 300px; /* Limit height */
+             margin-top: 1rem;
+             border-radius: 0.375rem; /* rounded-md */
+             border: 1px solid #d1d5db; /* gray-300 */
+         }
+         .dark #processedImage {
+             border-color: #4b5563; /* gray-600 */
+         }
+
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 min-h-screen flex items-center justify-center p-4">
+
+    <div class="main-container bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md w-full max-w-lg">
+
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-200">Veridia Vision Testing</h1>
+             <div class="theme-switch-wrapper">
+                <label class="theme-switch" for="themeToggleCheckbox">
+                    <input type="checkbox" id="themeToggleCheckbox" />
+                    <div class="slider">
+                         <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.894 6.166a.75.75 0 00-1.06-1.06l-1.591 1.59a.75.75 0 101.06 1.061l1.591-1.59zM21.75 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5H21a.75.75 0 01.75.75zM17.834 18.894a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 10-1.061 1.06l1.59 1.591zM12 18a.75.75 0 01.75.75V21a.75.75 0 01-1.5 0v-2.25A.75.75 0 0112 18zM7.758 17.303a.75.75 0 00-1.061-1.06l-1.591 1.59a.75.75 0 001.06 1.061l1.591-1.59zM6 12a.75.75 0 01-.75.75H3a.75.75 0 010-1.5h2.25A.75.75 0 016 12zM6.166 7.758a.75.75 0 001.06 1.06l1.59-1.591a.75.75 0 00-1.06-1.06L6.166 7.758z"></path></svg>
+                         <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M9.528 1.718a.75.75 0 01.162.819A8.97 8.97 0 009 6a9 9 0 009 9 8.97 8.97 0 003.463-.69.75.75 0 01.981.98 10.503 10.503 0 01-9.694 6.46c-5.799 0-10.5-4.701-10.5-10.5 0-3.51 1.713-6.63 4.362-8.542a.75.75 0 01.819.162z" clip-rule="evenodd"></path></svg>
+                    </div>
+                </label>
+            </div>
+        </div>
+         <p class="text-center text-sm text-gray-500 dark:text-gray-400 mb-6 -mt-4">(Gemini 2.5 Flash - Camera)</p>
+
+        <div class="mb-6 h-64 bg-gray-200 dark:bg-black rounded-md flex items-center justify-center overflow-hidden border border-gray-300 dark:border-gray-700">
+            <video id="videoFeed" autoplay playsinline muted></video>
+            <span id="cameraStatus" class="text-gray-400 dark:text-gray-500 p-4 text-center">Requesting camera access...</span>
+        </div>
+        <canvas id="snapshotCanvas"></canvas>
+
+        <button id="analyzeButton" class="w-full bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md transition duration-200 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed">
+            Capture & Analyze
+        </button>
+
+        <div id="statusMessage" class="mt-4 text-center text-sm text-gray-600 dark:text-gray-400 h-5"></div>
+
+        <div id="resultsArea" class="mt-6">
+            <h2 class="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-3">Analysis Results:</h2>
+            <div id="processedImageContainer" class="mb-4 text-center">
+                 <img id="processedImage" src="#" alt="Processed Image" class="hidden mx-auto">
+            </div>
+            <div id="resultsContent" class="space-y-3">
+                <p class="text-gray-500 dark:text-gray-400 text-sm">Point your camera at an item and click 'Capture & Analyze'.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const videoFeed = document.getElementById('videoFeed');
+        const cameraStatus = document.getElementById('cameraStatus');
+        const analyzeButton = document.getElementById('analyzeButton');
+        const statusMessage = document.getElementById('statusMessage');
+        const resultsContent = document.getElementById('resultsContent');
+        const snapshotCanvas = document.getElementById('snapshotCanvas');
+        const processedImage = document.getElementById('processedImage'); // Get image element
+        const processedImageContainer = document.getElementById('processedImageContainer'); // Get container
+        const ctx = snapshotCanvas.getContext('2d');
+        const themeToggle = document.getElementById('themeToggleCheckbox');
+
+        let currentStream = null;
+
+        // --- Function to Apply Theme ---
+        function applyTheme(isDark) {
+            // console.log(`Applying theme: ${isDark ? 'dark' : 'light'}`);
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+            // console.log('Current html classes:', document.documentElement.className);
+        }
+
+        // --- Function to Start Camera ---
+        async function startCamera() {
+            // console.log('Attempting to start camera...');
+             try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'environment' }
+                 });
+                 // console.log('Camera stream obtained.');
+                currentStream = stream;
+                videoFeed.srcObject = stream;
+                videoFeed.onloadedmetadata = () => {
+                    // console.log('Video metadata loaded.');
+                    cameraStatus.classList.add('hidden');
+                    videoFeed.classList.remove('hidden');
+                    analyzeButton.disabled = false;
+                    statusMessage.textContent = 'Camera active. Ready to analyze.';
+                    snapshotCanvas.width = videoFeed.videoWidth;
+                    snapshotCanvas.height = videoFeed.videoHeight;
+                     // console.log(`Canvas dimensions set: ${snapshotCanvas.width}x${snapshotCanvas.height}`);
+                };
+            } catch (error) {
+                console.error("Error accessing camera:", error);
+                let errorMsg = 'Error accessing camera.';
+                if (error.name === 'NotAllowedError') { errorMsg = 'Camera permission denied.'; }
+                else if (error.name === 'NotFoundError') { errorMsg = 'No camera found.'; }
+                else { errorMsg = `Error: ${error.name}`; }
+                cameraStatus.textContent = errorMsg;
+                cameraStatus.classList.remove('hidden');
+                videoFeed.classList.add('hidden');
+                statusMessage.textContent = 'Camera unavailable.';
+                analyzeButton.disabled = true;
+            }
+        }
+
+        // --- Event Listener for Analyze Button ---
+        analyzeButton.addEventListener('click', async function() {
+            // console.log('Analyze button clicked.');
+             if (!currentStream || !videoFeed.srcObject) {
+                 // console.warn('Analyze clicked but stream not available.');
+                statusMessage.textContent = 'Error: Camera stream not available.';
+                return;
+            }
+            analyzeButton.disabled = true;
+            statusMessage.innerHTML = '<span class="spinner"></span> Capturing & Analyzing...'; // Updated status
+            resultsContent.innerHTML = ''; // Clear previous text results
+            processedImage.classList.add('hidden'); // Hide previous processed image
+            processedImage.src = '#'; // Clear previous image src
+
+
+            try {
+                // Ensure canvas dimensions match video before drawing
+                if (snapshotCanvas.width !== videoFeed.videoWidth || snapshotCanvas.height !== videoFeed.videoHeight) {
+                    snapshotCanvas.width = videoFeed.videoWidth;
+                    snapshotCanvas.height = videoFeed.videoHeight;
+                }
+
+                // console.log('Drawing video frame to canvas...');
+                ctx.save();
+                ctx.scale(-1, 1); // Flip horizontally to match mirrored preview
+                ctx.drawImage(videoFeed, -snapshotCanvas.width, 0, snapshotCanvas.width, snapshotCanvas.height);
+                ctx.restore(); // Restore context to normal
+                const imageDataUrl = snapshotCanvas.toDataURL('image/jpeg', 0.9); // Use JPEG
+                 // console.log('Snapshot captured.');
+
+                // --- !!! ACTUAL API CALL !!! ---
+                // Replace the simulation with a fetch call to the backend
+                console.log("Sending image data to backend (/process_frame)...");
+
+                // Prepare the payload, including the flag for the test model
+                const payload = {
+                    image_data: imageDataUrl,
+                    use_test_model: true // <<< THIS FLAG TELLS THE BACKEND TO USE 2.5 FLASH
+                };
+
+                const response = await fetch('/process_frame', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload),
+                });
+
+                analyzeButton.disabled = false; // Re-enable button early
+
+                if (!response.ok) {
+                    // Try to get error details from response body
+                    let errorData = { error: `HTTP error! status: ${response.status}`, status: `Request failed.` };
+                    try {
+                         errorData = await response.json();
+                    } catch(e) { /* Ignore if response body is not JSON */ }
+                    console.error('Backend error:', errorData);
+                    throw new Error(errorData.status || `HTTP error! status: ${response.status}`);
+                }
+
+                const resultData = await response.json();
+                console.log("Received response from backend:", resultData);
+
+                // --- Display Results ---
+                statusMessage.textContent = resultData.status || 'Analysis complete!'; // Display status from backend
+                displayResults(resultData.object_details || []); // Display text details
+
+                // Display the processed image (with bounding boxes if found)
+                if (resultData.processed_image_data) {
+                     processedImage.src = resultData.processed_image_data;
+                     processedImage.classList.remove('hidden');
+                } else {
+                     processedImage.classList.add('hidden');
+                }
+
+
+            } catch (error) {
+                console.error("Error during analysis fetch:", error);
+                statusMessage.textContent = `Error: ${error.message}`;
+                resultsContent.innerHTML = `<p class="text-red-500 dark:text-red-400 text-sm">Analysis failed: ${error.message}</p>`;
+                processedImage.classList.add('hidden'); // Hide image on error
+                analyzeButton.disabled = false; // Re-enable button on error
+            }
+            // Note: Button re-enabling moved earlier or into finally block if preferred
+        });
+
+        // --- Function to Display Results ---
+        function displayResults(objectDetails) { // Changed parameter name
+             // console.log('Displaying results:', objectDetails);
+             resultsContent.innerHTML = ''; // Clear placeholder/previous
+            if (!objectDetails || objectDetails.length === 0) {
+                resultsContent.innerHTML = '<p class="text-gray-600 dark:text-gray-400">No objects identified in the snapshot.</p>';
+                // Keep processed image visible even if no objects, as it might show the original
+                // processedImage.classList.add('hidden');
+                return;
+            }
+
+            // If objects were found, ensure the image container shows the potentially boxed image
+            // processedImage.classList.remove('hidden'); // Handled in the fetch response now
+
+            objectDetails.forEach(item => {
+                const objectName = item.name || 'Unknown Object'; // Use 'name' from backend response
+                const label = item.classification || 'Unknown Classification'; // Use 'classification'
+                let labelColorClass = 'text-gray-700 bg-gray-100 dark:text-gray-200 dark:bg-gray-600'; // Default
+                if (label === 'recyclable') {
+                    labelColorClass = 'text-blue-700 bg-blue-100 dark:text-blue-200 dark:bg-blue-700';
+                } else if (label === 'organic') {
+                    labelColorClass = 'text-green-700 bg-green-100 dark:text-green-200 dark:bg-green-700';
+                } else if (label === 'non-recyclable') {
+                    labelColorClass = 'text-red-700 bg-red-100 dark:text-red-200 dark:bg-red-700';
+                } else if (label === 'human') {
+                    labelColorClass = 'text-purple-700 bg-purple-100 dark:text-purple-200 dark:bg-purple-700';
+                }
+                const resultElement = document.createElement('div');
+                resultElement.className = 'p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-md shadow-sm';
+                resultElement.innerHTML = `
+                    <span class="font-medium text-gray-900 dark:text-gray-100">${objectName}</span>:
+                    <span class="ml-2 inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${labelColorClass}">${label.toUpperCase()}</span>
+                `;
+                resultsContent.appendChild(resultElement);
+            });
+        }
+
+         // --- Event Listener for Theme Toggle ---
+        themeToggle.addEventListener('change', function() {
+            const isDark = this.checked;
+            // console.log(`Theme toggle changed. Checked: ${isDark}`);
+            applyTheme(isDark); // Apply the class
+            localStorage.setItem('veridiaTheme', isDark ? 'dark' : 'light');
+            // console.log("Saved theme preference to localStorage:", isDark ? 'dark' : 'light');
+        });
+
+
+        // --- Initialize Theme on Page Load ---
+        function initializeTheme() {
+             // console.log('Initializing theme...');
+             const savedTheme = localStorage.getItem('veridiaTheme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            let isDark;
+
+            if (savedTheme) { isDark = (savedTheme === 'dark'); }
+            else { isDark = prefersDark; }
+            // console.log(`Determined initial theme: ${isDark ? 'dark' : 'light'}`);
+
+            applyTheme(isDark);
+            themeToggle.checked = isDark;
+            // console.log(`Set toggle checkbox state to: ${isDark}`);
+
+            startCamera();
+        }
+
+        document.addEventListener('DOMContentLoaded', initializeTheme);
+
+
+        // --- Optional: Clean up camera stream when leaving the page ---
+        window.addEventListener('beforeunload', () => {
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+                // console.log("Camera stream stopped.");
+            }
+        });
 
     </script>
-     <style>
-         .prediction-item.object-item { display: flex; align-items: center; gap: var(--space-xs); padding: 10px 12px; border-left: 4px solid var(--primary-green); background-color: rgba(255, 255, 255, 0.04); border-radius: var(--border-radius-md); margin-bottom: var(--space-xs); }
-         .prediction-item.object-item:last-child { margin-bottom: 0; }
-         .prediction-item .item-icon { font-size: 1.2rem; color: var(--primary-green); flex-shrink: 0; }
-         .prediction-item .object-name { font-weight: 500; color: var(--text-light); font-size: 0.95rem; flex-grow: 1; word-break: break-word; }
-     </style>
+
 </body>
 </html>
