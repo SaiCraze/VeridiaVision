@@ -175,22 +175,22 @@ def classify_waste(image_bytes, use_test_model=False):
         # --- Select Model and Configuration ---
         if use_test_model:
             model_name = MODEL_TEST
-            # NOTE: Verify the exact structure for thinking_config with the official SDK docs
-            generation_config = {
-                'response_mime_type': 'application/json',
-                'temperature': 0.3, # Slightly lower temp for more deterministic JSON
-                'thinking_config': {
-                     # Set the thinking budget (tokens) for 2.5 Flash
-                     'thinking_budget': 1024
-                 }
-            }
+            # Corrected structure for thinking budget
+            # NOTE: Please verify this parameter name ('thinking_budget') with official SDK documentation if issues persist.
+            generation_config = genai.types.GenerationConfig(
+                response_mime_type='application/json',
+                temperature=0.3,
+                # Add thinking_budget directly here
+                thinking_budget=1024
+            )
             print(f"Using TEST model: {model_name} with thinking budget: 1024")
         else:
             model_name = MODEL_DEFAULT
-            generation_config = {
-                 'response_mime_type': 'application/json',
-                 'temperature': 0.3, # Consistent temperature
-            }
+            # Use GenerationConfig constructor here too for consistency
+            generation_config = genai.types.GenerationConfig(
+                 response_mime_type='application/json',
+                 temperature=0.3
+            )
             print(f"Using DEFAULT model: {model_name}")
 
         # --- Initialize Model and Prepare Request ---
@@ -223,7 +223,7 @@ def classify_waste(image_bytes, use_test_model=False):
         # --- Generate Content ---
         response = client.generate_content(
             contents=[prompt, image_part],
-            generation_config=generation_config,
+            generation_config=generation_config, # Pass the GenerationConfig object
             # Consider adding safety_settings if needed
             # safety_settings=[...]
         )
@@ -323,10 +323,15 @@ def classify_waste(image_bytes, use_test_model=False):
              error_details += f". Response Error Field: {response.error}"
 
         print(f"API Error Details: {error_details}")
-        return None, f"Error: AI communication failed. {str(e)[:100]}"
+        # Check if the error message itself indicates an unknown field
+        if "Unknown field for GenerationConfig" in str(e):
+             return None, f"API Config Error: Check parameter names (e.g., 'thinking_budget'). {str(e)[:100]}"
+        else:
+             return None, f"Error: AI communication failed. {str(e)[:100]}"
 
 
 # --- Flask Routes ---
+# ... (Routes remain the same as previous version) ...
 @app.route('/')
 def index():
     # Renders the main landing page (index.html)
