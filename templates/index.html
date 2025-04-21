@@ -6,8 +6,6 @@
     <title>Veridia Vision - Smart Recycling</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>♻️</text></svg>">
 
-    <!-- Google Analytics -->
-    <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZDVYQL279E"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -17,25 +15,38 @@
       gtag('config', 'G-ZDVYQL279E');
     </script>
 
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@400;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Material Icons -->
+
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0" rel="stylesheet">
 
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        /* Add a little margin between the two buttons */
+        .button-container .cta-button + .cta-button {
+            margin-top: 1rem; /* Adjust spacing as needed */
+        }
+        /* Optional: Basic styling for the test button if needed,
+           assuming .cta-button provides base styles.
+           You might want to adjust this in styles.css */
+        .test-button {
+            background-color: #5a67d8; /* Example: Indigo color */
+            /* Add hover styles if needed */
+        }
+        .test-button:hover {
+             background-color: #4c51bf; /* Darker Indigo */
+        }
+    </style>
 </head>
 <body class="modern-page">
-    <!-- Navigation -->
     <nav class="main-nav">
         <div class="nav-container">
             <div class="logo-container">
                 <span class="logo-icon">
                     <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M13 2C10.4288 2 7.9154 2.76244 5.77759 4.1909C3.63978 5.61935 1.97351 7.64968 0.991826 10.0251C0.0101517 12.4006 -0.252401 15.0144 0.250707 17.5362C0.753815 20.057[...]" fill="currentColor"/>
-                        <path d="M16.6183 7.72656C16.9121 7.72656 17.193 7.84102 17.4018 8.04988C17.6107 8.25873 17.7251 8.53962 17.7251 8.83344V11.0472C18.8078 11.2852 19.787 11.8768 20.5051 12.7[...]" fill="currentColor"/>
+                        <path d="M13 2C10.4288 2 7.9154 2.76244 5.77759 4.1909C3.63978 5.61935 1.97351 7.64968 0.991826 10.0251C0.0101517 12.4006 -0.252401 15.0144 0.250707 17.5362C0.753815 20.057 [...]" fill="currentColor"/>
+                        <path d="M16.6183 7.72656C16.9121 7.72656 17.193 7.84102 17.4018 8.04988C17.6107 8.25873 17.7251 8.53962 17.7251 8.83344V11.0472C18.8078 11.2852 19.787 11.8768 20.5051 12.7 [...]" fill="currentColor"/>
                     </svg>
                 </span>
                 <a href="#" class="logo-text">Veridia Vision</a>
@@ -47,20 +58,23 @@
         </div>
     </nav>
 
-    <!-- Hero Section -->
     <main class="hero-container">
         <div class="hero-content">
             <div class="hero-text">
                 <h1>Smart Recycling,<br>Powered by AI</h1>
                 <p class="hero-description">Veridia Vision uses cutting-edge AI to analyze live camera feeds, providing real-time waste classification for a greener future.</p>
-                <button id="start-detection-button" class="cta-button">
-                    Start Detection
-                </button>
+                <div class="button-container">
+                    <button id="start-detection-button" class="cta-button">
+                        Start Detection (2.0 Flash)
+                    </button>
+                    <a href="{{ url_for('camera_test_page') }}" class="cta-button test-button">
+                        Test New Model (2.5 Flash)
+                    </a>
+                </div>
             </div>
         </div>
     </main>
 
-    <!-- Features Section -->
     <section id="features" class="features-section">
         <div class="section-container">
             <h2 class="section-title">How It Works</h2>
@@ -84,7 +98,6 @@
         </div>
     </section>
 
-    <!-- Contact Section -->
     <section id="contact" class="contact-section">
         <div class="section-container">
             <h2 class="section-title">Contact Us</h2>
@@ -111,13 +124,15 @@
     </footer>
 
     <script>
-        // Get the button
-        var btn = document.getElementById("start-detection-button");
+        // Get the main detection button
+        var startBtn = document.getElementById("start-detection-button");
 
-        // When the user clicks the button, go directly to camera page
-        btn.onclick = function() {
-            window.location.href = "{{ url_for('camera_page') }}";
+        // When the user clicks the button, go to the main camera page
+        startBtn.onclick = function() {
+            window.location.href = "{{ url_for('camera_page') }}"; // Assumes your main camera route is named 'camera_page'
         }
+
+        // Note: The new testing button is an <a> tag, so it doesn't need separate JavaScript for navigation.
     </script>
 </body>
 </html>
