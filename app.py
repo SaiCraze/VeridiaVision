@@ -23,7 +23,8 @@ genai.configure(api_key=api_key)
 
 # Model Names
 MODEL_DEFAULT = "gemini-2.0-flash"
-MODEL_TEST = "gemini-2.5-flash-preview-0417" # Use the specific preview model ID
+# Ensure you use the correct, available model ID for the test model
+MODEL_TEST = "models/gemini-2.5-flash-preview-0417" # Example - Use the actual ID from Google AI Studio/Vertex AI docs
 
 # --- Data Model (Optional but good practice) ---
 class BoundingBox(BaseModel):
@@ -175,18 +176,16 @@ def classify_waste(image_bytes, use_test_model=False):
         # --- Select Model and Configuration ---
         if use_test_model:
             model_name = MODEL_TEST
-            # Corrected structure for thinking budget
-            # NOTE: Please verify this parameter name ('thinking_budget') with official SDK documentation if issues persist.
+            # REMOVED thinking_budget parameter - using model defaults for now.
+            # Check official SDK documentation for the correct way to control thinking budget.
             generation_config = genai.types.GenerationConfig(
                 response_mime_type='application/json',
-                temperature=0.3,
-                # Add thinking_budget directly here
-                thinking_budget=1024
+                temperature=0.3
+                # thinking_budget=1024 # <<< This caused an error, removed for now
             )
-            print(f"Using TEST model: {model_name} with thinking budget: 1024")
+            print(f"Using TEST model: {model_name} (Default Thinking Budget)")
         else:
             model_name = MODEL_DEFAULT
-            # Use GenerationConfig constructor here too for consistency
             generation_config = genai.types.GenerationConfig(
                  response_mime_type='application/json',
                  temperature=0.3
@@ -194,7 +193,13 @@ def classify_waste(image_bytes, use_test_model=False):
             print(f"Using DEFAULT model: {model_name}")
 
         # --- Initialize Model and Prepare Request ---
-        client = genai.GenerativeModel(model_name=model_name)
+        # Ensure the model name includes the 'models/' prefix if required by the SDK version
+        if not model_name.startswith('models/'):
+             client_model_name = f'models/{model_name}'
+        else:
+             client_model_name = model_name
+        client = genai.GenerativeModel(model_name=client_model_name) # Pass full model ID
+
         image_part = {"mime_type": "image/jpeg", "data": image_bytes} # Assuming JPEG input
         # System prompt remains the same
         prompt = """
@@ -324,8 +329,8 @@ def classify_waste(image_bytes, use_test_model=False):
 
         print(f"API Error Details: {error_details}")
         # Check if the error message itself indicates an unknown field
-        if "Unknown field for GenerationConfig" in str(e):
-             return None, f"API Config Error: Check parameter names (e.g., 'thinking_budget'). {str(e)[:100]}"
+        if "Unknown field for GenerationConfig" in str(e) or "got an unexpected keyword argument" in str(e):
+             return None, f"API Config Error: Check parameters like 'thinking_budget'. {str(e)[:100]}"
         else:
              return None, f"Error: AI communication failed. {str(e)[:100]}"
 
@@ -334,23 +339,17 @@ def classify_waste(image_bytes, use_test_model=False):
 # ... (Routes remain the same as previous version) ...
 @app.route('/')
 def index():
-    # Renders the main landing page (index.html)
-    # This page's JS should NOT send the use_test_model flag
-    print("Serving index.html for root route /") # Add log
-    return render_template('index.html') # CHANGED TO INDEX.HTML
+    print("Serving index.html for root route /")
+    return render_template('index.html')
 
 @app.route('/camera')
 def camera_page():
-    # Renders the main camera page (templates/camera.html)
-    # This page's JS should NOT send the use_test_model flag
-    print("Serving camera.html for route /camera") # Add log
+    print("Serving camera.html for route /camera")
     return render_template('camera.html')
 
 @app.route('/camera_test')
 def camera_test_page():
-    # Renders the test page (templates/camera_test.html)
-    # This page's JS WILL send the use_test_model flag
-    print("Serving camera_test.html for route /camera_test") # Add log
+    print("Serving camera_test.html for route /camera_test")
     return render_template('camera_test.html')
 
 @app.route('/process_frame', methods=['POST'])
@@ -363,97 +362,71 @@ def process_frame():
             return jsonify({"error": "Missing image_data", "status": "Client error: No image data received."}), 400
 
         image_data_url = data['image_data']
-        # Determine if the test model should be used based on the flag from frontend
-        use_test_model_flag = data.get('use_test_model', False) # Default to False
+        use_test_model_flag = data.get('use_test_model', False)
         print(f"Received process_frame request. use_test_model={use_test_model_flag}")
-
 
         # --- Decode Image ---
         try:
-            # Split header (e.g., "data:image/jpeg;base64,") from encoded data
             header, encoded = image_data_url.split(",", 1)
             image_bytes = base64.b64decode(encoded)
-            # Extract mime type (make robust)
-            mime_type = 'image/jpeg' # Default assumption
+            mime_type = 'image/jpeg'
             if ':' in header and ';' in header:
                  mime_part = header.split(':')[1].split(';')[0]
-                 if '/' in mime_part: # Basic check for valid mime type format
-                      mime_type = mime_part
+                 if '/' in mime_part: mime_type = mime_part
             print(f"Decoded image with assumed mime type: {mime_type}")
-            # Optional: Add stricter validation if needed, e.g., check allowed types
-            # if mime_type not in ['image/jpeg', 'image/png', 'image/webp']:
-            #     print(f"Warning: Received unexpected mime type: {mime_type}. Processing as JPEG.")
-            #     mime_type = 'image/jpeg' # Standardize
-
         except (ValueError, base64.binascii.Error, IndexError) as e:
             print(f"Base64 decoding or header parsing error: {e}")
             return jsonify({"error": "Invalid image data format", "status": "Client error: Bad image format."}), 400
 
-
         # --- Processing with selected model ---
         start_time = time.time()
-        # Pass the flag to the classification function
         bounding_boxes, status_message = classify_waste(image_bytes, use_test_model=use_test_model_flag)
         ai_time = time.time() - start_time
         print(f"Gemini classification took {ai_time:.2f} seconds. Status: {status_message}")
 
-
         # --- Draw Boxes and Prepare Response ---
-        processed_image_bytes = image_bytes # Default to original
+        processed_image_bytes = image_bytes
         boxes_found = False
         object_details_list = []
 
         if bounding_boxes is None:
-            # Error occurred in classify_waste, status_message has details
             print(f"classify_waste returned None. Status: {status_message}")
         elif not bounding_boxes:
-            # No objects found or validated
             print("classify_waste returned empty or invalid list. No objects detected/drawn.")
         else:
-            # Attempt to draw boxes only if we got valid data
             boxes_found = True
             start_draw_time = time.time()
             drawn_bytes = draw_bounding_boxes(image_bytes, bounding_boxes)
             draw_time = time.time() - start_draw_time
             print(f"Drawing boxes took {draw_time:.2f} seconds.")
-
             if drawn_bytes is not None and drawn_bytes != image_bytes:
                 processed_image_bytes = drawn_bytes
-            elif drawn_bytes is None: # Check if drawing explicitly failed
+            elif drawn_bytes is None:
                 print("Drawing boxes failed, returning original image.")
                 status_message += " (Error drawing boxes)"
-            # else: drawing might have returned original image due to no valid boxes
-
-            # Prepare details list from the (potentially filtered) bounding_boxes
             object_details_list = [
                  {"name": box.object_name, "classification": box.label}
-                 for box in bounding_boxes # Use the list returned by classify_waste
+                 for box in bounding_boxes
             ]
-
 
         # --- Prepare Response JSON ---
         processed_image_base64 = base64.b64encode(processed_image_bytes).decode('utf-8')
-        # Use the determined mime_type for the result data URL
         result_image_data_url = f"data:{mime_type};base64,{processed_image_base64}"
 
         return jsonify({
             "status": status_message,
             "processed_image_data": result_image_data_url,
-            "boxes_found": boxes_found, # Indicates if boxes were *attempted* to be drawn
-            "object_details": object_details_list # List of detected objects
+            "boxes_found": boxes_found,
+            "object_details": object_details_list
         })
 
     except Exception as e:
         print(f"Critical Error in /process_frame: {e}")
-        traceback.print_exc() # Print full stack trace
+        traceback.print_exc()
         return jsonify({"error": "An internal server error occurred", "status": "Server error during processing."}), 500
 
 
 # --- Run ---
 if __name__ == '__main__':
-    # Use waitress or gunicorn for production instead of Flask's debug server
-    # For development:
-    # Set debug=False if deploying, True for local development only
-    # Host 0.0.0.0 makes it accessible on your network, use 127.0.0.1 for local only
     app.run(debug=False, host='0.0.0.0', port=int(os.environ.get("PORT", 5000)))
 
