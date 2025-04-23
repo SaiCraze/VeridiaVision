@@ -27,16 +27,6 @@
         .button-container .cta-button + .cta-button {
             margin-top: 1rem; /* Adjust spacing as needed */
         }
-        /* Optional: Basic styling for the test button if needed,
-           assuming .cta-button provides base styles.
-           You might want to adjust this in styles.css */
-        .test-button {
-            background-color: #5a67d8; /* Example: Indigo color */
-            /* Add hover styles if needed */
-        }
-        .test-button:hover {
-             background-color: #4c51bf; /* Darker Indigo */
-        }
     </style>
 </head>
 <body class="modern-page">
@@ -45,8 +35,8 @@
             <div class="logo-container">
                 <span class="logo-icon">
                     <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M13 2C10.4288 2 7.9154 2.76244 5.77759 4.1909C3.63978 5.61935 1.97351 7.64968 0.991826 10.0251C0.0101517 12.4006 -0.252401 15.0144 0.250707 17.5362C0.753815 20.057 [...]" fill="currentColor"/>
-                        <path d="M16.6183 7.72656C16.9121 7.72656 17.193 7.84102 17.4018 8.04988C17.6107 8.25873 17.7251 8.53962 17.7251 8.83344V11.0472C18.8078 11.2852 19.787 11.8768 20.5051 12.7 [...]" fill="currentColor"/>
+                        <path d="M13 2C10.4288 2 7.9154 2.76244 5.77759 4.1909C3.63978 5.61935 1.97351 7.64968 0.991826 10.0251C0.0101517 12.4006 -0.252401 15.0144 0.250707 17.5362C0.753815 20.057 [..[...]
+                        <path d="M16.6183 7.72656C16.9121 7.72656 17.193 7.84102 17.4018 8.04988C17.6107 8.25873 17.7251 8.53962 17.7251 8.83344V11.0472C18.8078 11.2852 19.787 11.8768 20.5051 12.7 [..[...]
                     </svg>
                 </span>
                 <a href="#" class="logo-text">Veridia Vision</a>
@@ -67,9 +57,6 @@
                     <button id="start-detection-button" class="cta-button">
                         Start Detection (2.0 Flash)
                     </button>
-                    <a href="{{ url_for('camera_test_page') }}" class="cta-button test-button">
-                        Test New Model (2.5 Flash)
-                    </a>
                 </div>
             </div>
         </div>
@@ -131,8 +118,6 @@
         startBtn.onclick = function() {
             window.location.href = "{{ url_for('camera_page') }}"; // Assumes your main camera route is named 'camera_page'
         }
-
-        // Note: The new testing button is an <a> tag, so it doesn't need separate JavaScript for navigation.
     </script>
 </body>
 </html>
