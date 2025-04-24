@@ -211,6 +211,7 @@ def classify_waste(image_bytes, use_test_model=False):
         4. Classify humans as 'human'.
         5. Classify chips packets, chocolate wrappers, etc. as 'non-recyclable'.
         6. If a bottle has liquid or a container has food, classify as 'non-recyclable'.
+        7. If you see a person holding an object/objects, ONLY FOCUS ON THE OBJECT(S), not the person(s) or the background, only the objects given!
 
         Return ONLY a valid JSON array of objects. Each object must have the following format:
         {
