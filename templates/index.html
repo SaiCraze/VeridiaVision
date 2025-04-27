@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Veridia Vision - Smart Recycling</title>
+    <title>Veridia Vision - Smart Recycling Reimagined</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>♻️</text></svg>">
 
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZDVYQL279E"></script>
@@ -11,7 +11,6 @@
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-
       gtag('config', 'G-ZDVYQL279E');
     </script>
 
@@ -21,12 +20,434 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0" rel="stylesheet">
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <style>
-        /* Add a little margin between the two buttons */
-        .button-container .cta-button + .cta-button {
-            margin-top: 1rem; /* Adjust spacing as needed */
+        /* --- Base & Variables --- */
+        :root {
+            --bg-dark: #0f111a;
+            --bg-card: #1a1d29;
+            --primary-green: #00DC82;
+            --primary-dark-green: #003c1a;
+            --primary-light-green: #4eff9b;
+            --subtle-gray: #2c2f3b;
+            --text-light: #e1e4f0;
+            --text-gray: #a0a6b8;
+            --text-dark: #010101;
+
+            --font-primary: 'Poppins', sans-serif;
+            --font-heading: 'Space Grotesk', sans-serif;
+            --font-body: 'Poppins', sans-serif;
+            --font-interface: 'Montserrat', sans-serif;
+
+            --space-xs: 8px;
+            --space-sm: 16px;
+            --space-md: 24px;
+            --space-lg: 32px;
+            --space-xl: 48px;
+            --space-xxl: 64px;
+            --border-radius-sm: 6px;
+            --border-radius-md: 10px;
+            --border-radius-lg: 16px;
+            --container-width: 1200px;
+            --header-height: 70px;
+
+            /* Single set of cursor variables for the body */
+            --cursor-x: 50vw; /* Use viewport units for fixed positioning */
+            --cursor-y: 50vh;
         }
+
+        /* Basic Reset */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { font-size: 100%; scroll-behavior: smooth; }
+        body {
+            font-family: var(--font-primary);
+            color: var(--text-light);
+            background-color: var(--bg-dark);
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative; /* Needed for pseudo-elements if they use absolute */
+        }
+
+        /* --- Cursor Following Light (Applied to Body) --- */
+        body::after {
+            content: '';
+            position: fixed; /* Fixed position relative to viewport */
+            top: 0; left: 0; right: 0; bottom: 0;
+            /* Gradient centered at cursor variables */
+            background: radial-gradient(circle 500px at var(--cursor-x) var(--cursor-y), rgba(0, 220, 130, 0.12), transparent 70%); /* Greenish light */
+            z-index: 0; /* Position behind all content */
+            pointer-events: none; /* Allow clicks through */
+            transition: background 0.1s linear; /* Smooth movement */
+        }
+
+
+        /* --- Navigation --- */
+        .main-nav {
+            background-color: rgba(15, 17, 26, 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            position: fixed;
+            top: 0; left: 0; width: 100%;
+            z-index: 1000; /* Ensure nav is above body light */
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            transition: background-color 0.3s ease;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: var(--header-height);
+            width: 100%;
+            max-width: var(--container-width);
+            margin: 0 auto;
+            padding: 0 var(--space-md);
+        }
+
+        .logo-container { display: flex; align-items: center; gap: var(--space-xs); }
+        .logo-text {
+            color: var(--primary-green);
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: 1.5rem;
+            text-decoration: none;
+            letter-spacing: -0.5px;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: var(--space-sm);
+            margin-left: auto;
+        }
+
+        .nav-link {
+            color: var(--text-gray);
+            background-color: rgba(255, 255, 255, 0.05);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            font-family: var(--font-interface);
+            padding: 8px 16px;
+            border-radius: var(--border-radius-sm);
+            border: 1px solid transparent;
+            transition: all 0.25s ease;
+            position: relative;
+            white-space: nowrap;
+        }
+        .nav-link::after { display: none; }
+        .nav-link:hover {
+            color: var(--primary-green);
+            background-color: rgba(0, 220, 130, 0.1);
+            border-color: rgba(0, 220, 130, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 3px 10px rgba(0, 220, 130, 0.1);
+        }
+        .nav-link:active { transform: translateY(0px); box-shadow: none; }
+
+
+        /* --- Hero Section --- */
+        .hero-container {
+            position: relative; /* Still needed for ::before */
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            padding: var(--header-height) var(--space-md) 0;
+            /* Background color is now handled by body */
+        }
+        .hero-container::before { /* Animated Gradient (Specific to Hero) */
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle at 30% 10%, #845ef7aa 0%, transparent 40%),
+                        radial-gradient(circle at 70% 80%, #00dc82aa 0%, transparent 40%),
+                        radial-gradient(circle at 50% 50%, #ff7e5fcc 0%, transparent 35%),
+                        radial-gradient(circle at 10% 90%, #2193b0aa 0%, transparent 45%);
+            background-size: 150% 150%;
+            animation: moveGradient 25s ease infinite alternate;
+            z-index: 1; /* Above body light, below hero content */
+            filter: blur(50px);
+        }
+        @keyframes moveGradient { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        /* REMOVED .hero-container::after (Cursor Light) */
+
+        /* Hero Content Container (Glassmorphism) */
+        .hero-content-wrapper {
+            position: relative;
+            z-index: 2; /* Above hero gradient and body light */
+            padding: var(--space-xl) var(--space-lg);
+            background-color: rgba(26, 29, 41, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--border-radius-lg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            max-width: 700px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInHero 1s ease-out 0.5s forwards;
+        }
+        @keyframes fadeInHero { to { opacity: 1; transform: translateY(0); } }
+
+        .hero-content-wrapper h1 {
+            font-family: var(--font-heading);
+            font-size: clamp(2.5rem, 6vw, 4rem);
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: var(--space-md);
+            color: var(--text-light);
+            letter-spacing: -1px;
+            opacity: 0;
+            transform: translateY(15px);
+            animation: fadeInUp 0.8s ease-out 1s forwards;
+        }
+        .hero-description {
+            font-family: var(--font-body);
+            font-size: clamp(1rem, 2.5vw, 1.25rem);
+            color: var(--text-gray);
+            margin-bottom: var(--space-lg);
+            max-width: 540px;
+            line-height: 1.7;
+            margin-left: auto; margin-right: auto;
+            opacity: 0;
+            transform: translateY(15px);
+            animation: fadeInUp 0.8s ease-out 1.2s forwards;
+        }
+        .hero-buttons {
+            opacity: 0;
+            transform: translateY(15px);
+            animation: fadeInUp 0.8s ease-out 1.4s forwards;
+        }
+        @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+
+        .cta-button {
+            font-family: var(--font-interface);
+            background-color: var(--primary-green);
+            color: var(--primary-dark-green);
+            border: none;
+            padding: 14px 32px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: var(--border-radius-sm);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-block;
+            letter-spacing: 0.3px;
+            box-shadow: 0 4px 15px rgba(0, 220, 130, 0.1);
+        }
+        .cta-button:hover {
+            background-color: var(--primary-light-green);
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 6px 20px rgba(0, 220, 130, 0.3);
+        }
+
+        /* --- General Section Styling --- */
+        .content-section {
+             padding: var(--space-xxl) 0;
+             position: relative; /* Ensure content is above body light */
+             z-index: 1; /* Sit above body light */
+             overflow: hidden;
+        }
+        .section-container { width: 100%; max-width: var(--container-width); margin: 0 auto; padding: 0 var(--space-md); }
+        .section-title {
+            font-family: var(--font-heading);
+            font-size: clamp(2rem, 5vw, 2.8rem);
+            font-weight: 700;
+            margin-bottom: var(--space-xl);
+            text-align: center;
+            color: var(--text-light);
+            letter-spacing: -0.5px;
+        }
+        /* Scroll Animation */
+        .scroll-animate { opacity: 0; transform: translateY(40px); transition: opacity 0.8s ease-out, transform 0.8s ease-out; }
+        .scroll-animate.visible { opacity: 1; transform: translateY(0); }
+
+        /* --- Features Section --- */
+        .features-section { background-color: transparent; } /* Remove specific background */
+        .feature-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-lg); margin-top: var(--space-lg); }
+        .feature-card {
+            background-color: var(--bg-card); /* Keep card background */
+            border-radius: var(--border-radius-lg);
+            padding: var(--space-lg);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex; flex-direction: column; align-items: center; text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition-delay: calc(0.1s * var(--card-index, 0));
+            position: relative; /* Ensure content is above body light */
+             z-index: 1;
+        }
+        .feature-card:hover { transform: translateY(-8px) scale(1.02); box-shadow: 0 10px 25px rgba(0, 220, 130, 0.15); border-color: rgba(0, 220, 130, 0.5); }
+        .feature-icon {
+            font-size: 3rem; color: var(--primary-green); margin-bottom: var(--space-md);
+            background-color: rgba(0, 220, 130, 0.1); padding: var(--space-sm); border-radius: 50%;
+            display: inline-flex; align-items: center; justify-content: center;
+        }
+        .feature-card h3 { font-family: var(--font-heading); font-size: 1.5rem; font-weight: 600; margin-bottom: var(--space-xs); color: var(--text-light); }
+        .feature-card p { color: var(--text-gray); font-size: 1rem; line-height: 1.7; }
+
+        /* --- Testimonials Section --- */
+        .testimonials-section { background-color: var(--bg-card); } /* Keep card background */
+        .testimonial-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--space-lg); margin-top: var(--space-lg); }
+        .testimonial-card {
+            background-color: var(--bg-dark); border-radius: var(--border-radius-md); padding: var(--space-lg);
+            border: 1px solid rgba(255, 255, 255, 0.05); position: relative;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            transition-delay: calc(0.1s * var(--card-index, 0));
+             z-index: 1; /* Above body light */
+             min-height: 180px; /* Give empty cards some height */
+        }
+        .testimonial-card:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25); }
+        .testimonial-card::before { content: '“'; position: absolute; top: var(--space-md); left: var(--space-md); font-size: 4rem; color: var(--primary-green); opacity: 0.15; font-family: serif; line-height: 1; }
+        .testimonial-text { font-style: italic; color: var(--text-gray); margin-bottom: var(--space-md); position: relative; z-index: 1; font-size: 1.05rem; min-height: 3em; /* Reserve space for text */ }
+        .testimonial-author { font-weight: 600; color: var(--text-light); margin-top: var(--space-sm); text-align: right; min-height: 2.5em; /* Reserve space for author */ }
+        .testimonial-author span { display: block; font-weight: 400; font-size: 0.9rem; color: var(--primary-green); opacity: 0.8; }
+
+        /* --- Contact Section --- */
+        .contact-section {
+            background-color: transparent; /* Remove specific background */
+            position: relative;
+            overflow: hidden; /* Contain elements */
+             z-index: 1; /* Sit above body light */
+        }
+        /* REMOVED .contact-section::after (Cursor Light) */
+
+        .contact-description {
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto var(--space-lg);
+            color: var(--text-gray);
+            font-size: 1.1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .contact-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: var(--space-lg);
+            margin-top: var(--space-xl);
+            justify-content: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .contact-card {
+            /* Keep Glassmorphism */
+            background-color: rgba(26, 29, 41, 0.55);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--border-radius-lg);
+            padding: var(--space-xl);
+            text-align: center;
+            transition: transform 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+            transition-delay: calc(0.1s * var(--card-index, 0));
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            min-height: 250px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+             z-index: 1; /* Above body light */
+        }
+
+        .contact-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            background-color: rgba(0, 220, 130, 0.1);
+            border-color: rgba(0, 220, 130, 0.4);
+            box-shadow: 0 10px 30px rgba(0, 220, 130, 0.1);
+        }
+
+        .contact-icon {
+            font-size: 3rem;
+            color: var(--primary-green);
+            margin-bottom: var(--space-md);
+        }
+
+        .contact-card h3 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: var(--space-sm);
+            color: var(--text-light);
+        }
+
+        .contact-link {
+            color: var(--primary-green);
+            text-decoration: none;
+            transition: color 0.2s ease, text-decoration 0.2s ease;
+            word-break: break-all;
+            font-size: 1.05rem;
+            font-weight: 500;
+        }
+        .contact-link:hover {
+            color: var(--primary-light-green);
+            text-decoration: underline;
+        }
+
+        /* --- Footer --- */
+        .main-footer {
+             background-color: var(--bg-dark);
+             padding: var(--space-lg) 0;
+             border-top: 1px solid rgba(255, 255, 255, 0.05);
+             text-align: center;
+             position: relative; /* Ensure footer is above body light */
+             z-index: 1;
+        }
+        .main-footer p { color: var(--text-gray); font-size: 0.95rem; }
+
+        /* --- Modal Styles --- */
+        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0, 0, 0, 0.8); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); animation: fadeInModal 0.3s ease-out; align-items: center; justify-content: center; }
+        .modal-content {
+            background-color: var(--bg-card); padding: var(--space-lg); border: 1px solid var(--primary-green); border-radius: var(--border-radius-md);
+            width: 90%; max-width: 500px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); position: relative;
+            animation: slideInModal 0.4s ease-out; color: var(--text-light);
+             z-index: 2001; /* Ensure modal content is above everything */
+        }
+        @keyframes fadeInModal { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideInModal { from { transform: translateY(-30px) scale(0.95); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
+        .modal-content h2 { font-family: var(--font-heading); color: var(--primary-green); margin-bottom: var(--space-md); text-align: center; font-size: 1.8rem; letter-spacing: -0.5px; }
+        .modal-content p { margin-bottom: var(--space-sm); line-height: 1.7; text-align: center; }
+        .modal-content ul { list-style-position: inside; padding-left: var(--space-sm); margin-bottom: var(--space-lg); text-align: left; }
+        .modal-content li { margin-bottom: var(--space-xs); color: var(--text-gray); }
+        .close-button { color: var(--text-gray); position: absolute; top: 15px; right: 20px; font-size: 28px; font-weight: bold; cursor: pointer; transition: color 0.2s ease, transform 0.2s ease; }
+        .close-button:hover, .close-button:focus { color: var(--primary-green); transform: scale(1.1); text-decoration: none; }
+        #proceed-button.cta-button { display: block; margin: var(--space-md) auto 0; width: fit-content; }
+
+
+        /* --- Media Queries --- */
+        @media (max-width: 992px) {
+             .nav-links { gap: var(--space-xs); }
+             .nav-link { padding: 6px 12px; font-size: 0.85rem;}
+             .contact-cards { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .hero-content-wrapper { padding: var(--space-lg) var(--space-md); }
+            .feature-cards, .testimonial-cards, .contact-cards { grid-template-columns: 1fr; gap: var(--space-md); }
+            .section-title { margin-bottom: var(--space-lg); }
+            .contact-cards { max-width: 400px; margin-left: auto; margin-right: auto; }
+            .contact-card { padding: var(--space-lg); }
+        }
+
+        @media (max-width: 576px) {
+             .hero-content-wrapper h1 { font-size: 2.2rem; }
+             .hero-description { font-size: 1rem; }
+             .hero-buttons .cta-button { width: 80%; margin: 0 auto; }
+             .section-title { font-size: 1.8rem; }
+             .content-section { padding: var(--space-xl) 0; }
+             .contact-cards { max-width: none; }
+        }
+
+        /* Accessibility: Reduce motion */
+        @media (prefers-reduced-motion: reduce) {
+          *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+          .scroll-animate { opacity: 1; transform: none; }
+        }
+
     </style>
 </head>
 <body class="modern-page">
@@ -35,68 +456,81 @@
             <div class="logo-container">
                 <span class="logo-icon">
                     <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M13 2C10.4288 2 7.9154 2.76244 5.77759 4.1909C3.63978 5.61935 1.97351 7.64968 0.991826 10.0251C0.0101517 12.4006 -0.252401 15.0144 0.250707 17.5362C0.753815 20.057 [..[...]
-                        <path d="M16.6183 7.72656C16.9121 7.72656 17.193 7.84102 17.4018 8.04988C17.6107 8.25873 17.7251 8.53962 17.7251 8.83344V11.0472C18.8078 11.2852 19.787 11.8768 20.5051 12.7 [..[...]
+                        <path d="M13 2C10.4288 2 7.9154 2.76244 5.77759 4.1909C3.63978 5.61935 1.97351 7.64968 0.991826 10.0251C0.0101517 12.4006 -0.252401 15.0144 0.250707 17.5362C0.753815 20.0579 1.98979 22.3743 3.80762 24.1921C5.62545 26.01 7.94189 27.2459 10.4636 27.749C12.9854 28.2521 15.5992 27.9895 17.9747 27.0078C20.3502 26.0262 22.3805 24.3599 23.809 22.2221C25.2374 20.0843 25.9999 17.5709 25.9999 14.9997C25.9999 11.4869 24.5777 8.10073 22.0498 5.57285C19.5219 3.04497 16.1357 1.62275 12.6229 1.62275L13 2Z" fill="#00DC82"/>
+                        <path d="M16.6183 7.72656C16.9121 7.72656 17.193 7.84102 17.4018 8.04988C17.6107 8.25873 17.7251 8.53962 17.7251 8.83344V11.0472C18.8078 11.2852 19.787 11.8768 20.5051 12.7328C21.2232 13.5888 21.6341 14.6612 21.6736 15.78C21.713 16.8988 21.3786 18.0004 20.7207 18.9107C20.0627 19.8211 19.1207 20.487 18.0566 20.7978C16.9924 21.1086 15.8558 21.0442 14.8335 20.6148C13.8113 20.1855 12.9638 19.4167 12.4369 18.4371C11.91 17.4575 11.7326 16.327 11.9343 15.2329C12.136 14.1388 12.7051 13.1462 13.5487 12.4145C13.6158 12.3533 13.6971 12.3086 13.7861 12.2848C13.875 12.2611 13.9686 12.2591 14.0584 12.279C14.1482 12.2989 14.2313 12.3401 14.3007 12.3985C14.3701 12.4569 14.4237 12.5307 14.4565 12.6135C14.4893 12.6963 14.5 12.7853 14.488 12.8724C14.4759 12.9594 14.4415 13.0416 14.3878 13.1116C14.334 13.1815 14.2627 13.2371 14.1801 13.2731C14.0975 13.3091 14.0064 13.3245 13.9164 13.318C13.1855 13.897 12.6909 14.7381 12.543 15.6746C12.3951 16.6111 12.6049 17.5705 13.1318 18.3577C13.6586 19.1449 14.4653 19.7056 15.3871 19.9356C16.3089 20.1656 17.2845 20.0478 18.1183 19.6051C18.9521 19.1624 19.5871 18.4291 19.9105 17.5407C20.2339 16.6523 20.2211 15.6743 19.8745 14.7947C19.5279 13.9151 18.8731 13.1981 18.0282 12.7764C17.1834 12.3546 16.2069 12.2588 15.2943 12.5082V15.1671C15.2943 15.4609 15.1798 15.7418 14.971 15.9507C14.7621 16.1595 14.4812 16.274 14.1874 16.274C13.8936 16.274 13.6127 16.1595 13.4038 15.9507C13.195 15.7418 13.0805 15.4609 13.0805 15.1671V8.83344C13.0805 8.53962 13.195 8.25873 13.4038 8.04988C13.6127 7.84102 13.8936 7.72656 14.1874 7.72656H16.6183Z" fill="#003c1a"/>
                     </svg>
                 </span>
                 <a href="#" class="logo-text">Veridia Vision</a>
             </div>
             <ul class="nav-links">
                 <li><a href="#features" class="nav-link">Features</a></li>
-                <li><a href="#contact" class="nav-link">Contact</a></li>
+                <li><a href="#testimonials" class="nav-link">Testimonials</a></li>
+                <li><a href="/changelog" class="nav-link">Changelog</a></li> <li><a href="#contact" class="nav-link">Contact</a></li>
             </ul>
-        </div>
+            </div>
     </nav>
 
     <main class="hero-container">
-        <div class="hero-content">
-            <div class="hero-text">
-                <h1>Smart Recycling,<br>Powered by AI</h1>
-                <p class="hero-description">Veridia Vision uses cutting-edge AI to analyze live camera feeds, providing real-time waste classification for a greener future.</p>
-                <div class="button-container">
-                    <button id="start-detection-button" class="cta-button">
-                        Start Detection (2.0 Flash)
-                    </button>
+        <div class="hero-content-wrapper">
+            <h1>Smart Recycling,<br>Reimagined with AI</h1>
+            <p class="hero-description">Veridia Vision uses cutting-edge AI to analyze live camera feeds, providing real-time waste classification for a greener future.</p>
+            <div class="hero-buttons">
+                <button id="start-detection-button" class="cta-button">
+                    Start Detection
+                </button>
                 </div>
-            </div>
         </div>
     </main>
 
-    <section id="features" class="features-section">
+    <section id="features" class="content-section features-section">
         <div class="section-container">
-            <h2 class="section-title">How It Works</h2>
+            <h2 class="section-title scroll-animate">How It Works</h2>
             <div class="feature-cards">
-                <div class="feature-card">
-                    <span class="feature-icon material-symbols-rounded">camera</span>
+                <div class="feature-card scroll-animate" style="--card-index: 1;">
+                    <span class="feature-icon material-symbols-rounded">linked_camera</span>
                     <h3>Point & Scan</h3>
-                    <p>Simply point your camera at waste items and let our AI do the rest. No manual sorting required.</p>
+                    <p>Simply point your camera at waste items. Our AI instantly analyzes and identifies objects.</p>
                 </div>
-                <div class="feature-card">
-                    <span class="feature-icon material-symbols-rounded">analytics</span>
-                    <h3>Instant Analysis</h3>
-                    <p>Get immediate identification of objects with classification as recyclable, non-recyclable, or organic waste.</p>
+                <div class="feature-card scroll-animate" style="--card-index: 2;">
+                    <span class="feature-icon material-symbols-rounded">auto_awesome</span>
+                    <h3>AI Classification</h3>
+                    <p>Get immediate classification as recyclable, non-recyclable, or organic based on local guidelines.</p>
                 </div>
-                <div class="feature-card">
-                    <span class="feature-icon material-symbols-rounded">settings_voice</span>
+                <div class="feature-card scroll-animate" style="--card-index: 3;">
+                    <span class="feature-icon material-symbols-rounded">spatial_audio</span>
                     <h3>Voice Feedback</h3>
-                    <p>Hands-free operation with voice announcements of detection results and classification guidance.</p>
+                    <p>Enable hands-free operation with clear voice announcements of detection results.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <section id="contact" class="contact-section">
+    <section id="testimonials" class="content-section testimonials-section">
         <div class="section-container">
-            <h2 class="section-title">Contact Us</h2>
-            <p class="contact-description">Have questions or feedback about Veridia Vision? Reach out to our team.</p>
+            <h2 class="section-title scroll-animate">What People Say</h2>
+            <div class="testimonial-cards">
+                <div class="testimonial-card scroll-animate" style="--card-index: 1;">
+                    <p class="testimonial-text"></p> <p class="testimonial-author"><span></span></p> </div>
+                <div class="testimonial-card scroll-animate" style="--card-index: 2;">
+                     <p class="testimonial-text"></p> <p class="testimonial-author"><span></span></p> </div>
+                <div class="testimonial-card scroll-animate" style="--card-index: 3;">
+                     <p class="testimonial-text"></p> <p class="testimonial-author"><span></span></p> </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact" class="content-section contact-section">
+        <div class="section-container">
+            <h2 class="section-title scroll-animate">Get In Touch</h2>
+            <p class="contact-description scroll-animate">Have questions, feedback, or partnership ideas about Veridia Vision? Reach out to our team.</p>
             <div class="contact-cards">
-                <div class="contact-card">
-                    <span class="contact-icon material-symbols-rounded">email</span>
+                <div class="contact-card scroll-animate" style="--card-index: 1;">
+                    <span class="contact-icon material-symbols-rounded">mail</span>
                     <h3>Email</h3>
                     <a href="mailto:koustubhnemani@gmail.com" class="contact-link">koustubhnemani@gmail.com</a>
                 </div>
-                <div class="contact-card">
-                    <span class="contact-icon material-symbols-rounded">alternate_email</span>
+                <div class="contact-card scroll-animate" style="--card-index: 2;">
+                    <span class="contact-icon material-symbols-rounded">school</span>
                     <h3>Academic</h3>
                     <a href="mailto:nemas0495@wrdsb.ca" class="contact-link">nemas0495@wrdsb.ca</a>
                 </div>
@@ -106,17 +540,72 @@
 
     <footer class="main-footer">
         <div class="section-container">
-            <p>© 2025 Veridia Vision. All rights reserved.</p>
+            <p>© 2025 Veridia Vision. Pioneering AI for a Sustainable Future.</p>
         </div>
     </footer>
 
-    <script>
-        // Get the main detection button
-        var startBtn = document.getElementById("start-detection-button");
+    <div id="instructionModal" class="modal">
+      <div class="modal-content">
+        <span class="close-button">×</span>
+        <h2>Before You Start</h2>
+        <p>Quick guide to using Veridia Vision:</p>
+        <ul>
+            <li>Ensure good lighting for accurate detection.</li>
+            <li>Hold the camera steady over waste items.</li>
+            <li>Results appear instantly on the right panel.</li>
+            <li>Use top controls for voice & camera selection.</li>
+        </ul>
+        <button id="proceed-button" class="cta-button">Proceed to Camera</button>
+      </div>
+    </div>
 
-        // When the user clicks the button, go to the main camera page
-        startBtn.onclick = function() {
-            window.location.href = "{{ url_for('camera_page') }}"; // Assumes your main camera route is named 'camera_page'
+    <script>
+        // --- Cursor Following Light (Applied to Body) ---
+        const bodyElement = document.body;
+
+        bodyElement.addEventListener('mousemove', (e) => {
+            // Use clientX/Y for fixed positioning relative to viewport
+            const x = e.clientX;
+            const y = e.clientY;
+            // Update CSS variables on the body
+            bodyElement.style.setProperty('--cursor-x', `${x}px`);
+            bodyElement.style.setProperty('--cursor-y', `${y}px`);
+        });
+
+        // Optional: Reset light position when mouse leaves the window
+        bodyElement.addEventListener('mouseleave', () => {
+            bodyElement.style.setProperty('--cursor-x', `50vw`);
+            bodyElement.style.setProperty('--cursor-y', `50vh`);
+        });
+
+        // --- Scroll Animations ---
+        const animatedElements = document.querySelectorAll('.scroll-animate');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+        animatedElements.forEach(el => { observer.observe(el); });
+
+        // --- Modal Logic ---
+        const modal = document.getElementById("instructionModal");
+        const startBtn = document.getElementById("start-detection-button");
+        const span = document.querySelector("#instructionModal .close-button");
+        const proceedBtn = document.getElementById("proceed-button");
+
+        if (modal && startBtn && span && proceedBtn) {
+            startBtn.onclick = function() { modal.style.display = "flex"; }
+            span.onclick = function() { modal.style.display = "none"; }
+            proceedBtn.onclick = function() { window.location.href = "/camera"; } // Adjust route if needed
+            window.onclick = function(event) { if (event.target == modal) { modal.style.display = "none"; } }
+        } else {
+            console.warn("Modal elements or Start Detection button not found correctly.");
+            if (!modal) console.warn("Modal container missing");
+            if (!startBtn) console.warn("Start Detection button in hero missing");
+            if (!span) console.warn("Modal close button missing");
+            if (!proceedBtn) console.warn("Modal proceed button missing");
         }
     </script>
 </body>
