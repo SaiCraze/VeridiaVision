@@ -22,9 +22,9 @@ if not api_key:
 genai.configure(api_key=api_key)
 
 # Model Names
-MODEL_DEFAULT = "gemini-2.5-flash-preview-04-17" # Or your preferred default vision model
-# Updated MODEL_TEST to the Gemini 2.5 Flash preview model
-MODEL_TEST = "gemini-2.5-flash-preview-04-17" # Use the specific preview model ID
+MODEL_DEFAULT = "gemini-2.0-flash"
+# Ensure you use the correct, available model ID for the test model
+MODEL_TEST = "models/gemini-2.5-flash-preview-0417" # Example - Use the actual ID from Google AI Studio/Vertex AI docs
 
 # --- Data Model (Optional but good practice) ---
 class BoundingBox(BaseModel):
@@ -90,11 +90,7 @@ def draw_bounding_boxes(image_bytes, bounding_boxes):
                         font = ImageFont.truetype("DejaVuSans-Bold.ttf", font_size) # Common Linux bold font
                     except IOError:
                         print("Warning: Bold/Regular Arial/DejaVuSans fonts not found. Using default PIL font.")
-                        # Attempt to load default font with a size parameter if supported by PIL version
-                        try:
-                            font = ImageFont.load_default(size=font_size)
-                        except AttributeError:
-                             font = ImageFont.load_default() # Fallback to basic default
+                        font = ImageFont.load_default(size=font_size) # Use default PIL font with size attempt
 
         for box in valid_box_objects: # Iterate over validated/parsed objects
             y_min, x_min, y_max, x_max = box.box_2d
@@ -127,34 +123,24 @@ def draw_bounding_boxes(image_bytes, bounding_boxes):
                  text_width = text_bbox_calc[2] - text_bbox_calc[0]
                  text_height = text_bbox_calc[3] - text_bbox_calc[1]
             except AttributeError: # Fallback for older PIL/Pillow or default font
-                 try:
-                     text_width, text_height = draw.textlength(display_label, font=font), font.getsize(display_label)[1] # Try getting height
-                 except AttributeError:
-                      text_width, text_height = draw.textlength(display_label, font=font), font_size # Approximate height as last resort
+                 text_width, text_height = draw.textlength(display_label, font=font), font_size # Approximate height
 
-
-            text_x = abs_x_min + line_width // 2 # Adjust slightly for better centering within background
-            text_y = abs_y_min + line_width // 2
+            text_x = abs_x_min + line_width
+            text_y = abs_y_min + line_width
 
             bg_x0 = abs_x_min
             bg_y0 = abs_y_min
             # Add padding around text for the background
-            padding = line_width // 2
-            bg_x1 = text_x + text_width + padding
-            bg_y1 = text_y + text_height + padding
+            bg_x1 = text_x + text_width + line_width
+            bg_y1 = text_y + text_height + line_width
 
             # Ensure background doesn't exceed image bounds
             bg_x1 = min(bg_x1, width)
             bg_y1 = min(bg_y1, height)
-            # Ensure background doesn't overlap box outline excessively
-            bg_x0 = max(bg_x0, abs_x_min)
-            bg_y0 = max(bg_y0, abs_y_min)
-
 
             # Ensure background coordinates are valid
             if bg_x0 < bg_x1 and bg_y0 < bg_y1:
                  draw.rectangle((bg_x0, bg_y0, bg_x1, bg_y1), fill=color)
-                 # Adjust text position slightly for padding
                  draw.text((text_x, text_y), display_label, fill='#1a1a2e', font=font) # Dark text for contrast
             else:
                  print(f"Skipping drawing text background for {object_name} due to invalid dimensions.")
@@ -189,16 +175,15 @@ def classify_waste(image_bytes, use_test_model=False):
     try:
         # --- Select Model and Configuration ---
         if use_test_model:
-            model_name = MODEL_TEST # Use the 2.5 Flash Preview model
-            # Configure with thinking budget
+            model_name = MODEL_TEST
+            # REMOVED thinking_budget parameter - using model defaults for now.
+            # Check official SDK documentation for the correct way to control thinking budget.
             generation_config = genai.types.GenerationConfig(
                 response_mime_type='application/json',
-                temperature=0.3,
-                thinking_config=genai.types.ThinkingConfig(
-                    thinking_budget=1024 # Set the thinking budget
-                )
+                temperature=0.3
+                # thinking_budget=1024 # <<< This caused an error, removed for now
             )
-            print(f"Using TEST model: {model_name} (Thinking Budget: 1024)")
+            print(f"Using TEST model: {model_name} (Default Thinking Budget)")
         else:
             model_name = MODEL_DEFAULT
             generation_config = genai.types.GenerationConfig(
@@ -209,11 +194,11 @@ def classify_waste(image_bytes, use_test_model=False):
 
         # --- Initialize Model and Prepare Request ---
         # Ensure the model name includes the 'models/' prefix if required by the SDK version
-        # NOTE: Preview models often DO NOT need the 'models/' prefix. Check SDK docs if issues arise.
-        # For "gemini-2.5-flash-preview-04-17", the prefix is likely NOT needed.
-        client_model_name = model_name # Use the name directly
-
-        client = genai.GenerativeModel(model_name=client_model_name)
+        if not model_name.startswith('models/'):
+             client_model_name = f'models/{model_name}'
+        else:
+             client_model_name = model_name
+        client = genai.GenerativeModel(model_name=client_model_name) # Pass full model ID
 
         image_part = {"mime_type": "image/jpeg", "data": image_bytes} # Assuming JPEG input
         # System prompt remains the same
@@ -227,7 +212,6 @@ def classify_waste(image_bytes, use_test_model=False):
         5. Classify chips packets, chocolate wrappers, etc. as 'non-recyclable'.
         6. If a bottle has liquid or a container has food, classify as 'non-recyclable'.
         7. If you see a person holding an object/objects, ONLY FOCUS ON THE OBJECT(S), not the person(s) or the background, only the objects given!
-        8. Look at the object VERY carefully and analyze it correctly.
 
         Return ONLY a valid JSON array of objects. Each object must have the following format:
         {
@@ -280,13 +264,13 @@ def classify_waste(image_bytes, use_test_model=False):
              try:
                  # Add default object_name if missing before validation
                  if 'object_name' not in box_data:
-                     box_data['object_name'] = 'Unknown object'
+                      box_data['object_name'] = 'Unknown object'
                  validated_box = BoundingBox(**box_data)
                  # Additional checks
                  if not (isinstance(validated_box.box_2d, list) and len(validated_box.box_2d) == 4 and all(isinstance(c, int) and 0 <= c <= 1000 for c in validated_box.box_2d)):
-                     raise ValueError("box_2d format invalid (must be list of 4 ints 0-1000)")
+                      raise ValueError("box_2d format invalid (must be list of 4 ints 0-1000)")
                  if validated_box.label not in ["recyclable", "non-recyclable", "organic", "human"]:
-                     raise ValueError(f"Invalid label '{validated_box.label}'")
+                      raise ValueError(f"Invalid label '{validated_box.label}'")
 
                  validated_boxes.append(validated_box)
              except (ValidationError, ValueError) as e:
@@ -326,6 +310,10 @@ def classify_waste(image_bytes, use_test_model=False):
         print(f"Error decoding JSON from Gemini response: {e}")
         print(f"Response text that failed: '{cleaned_response_text[:500]}...'")
         return None, f"Error: Could not parse AI response. {str(e)[:100]}"
+    # Keep Pydantic validation error separate if needed, though handled above now
+    # except ValidationError as e:
+    #     print(f"Validation Error processing Gemini response: {e}")
+    #     return None, f"Error: AI response format incorrect. {str(e)[:100]}"
     except Exception as e:
         print(f"Error during Gemini API call or processing: {e}")
         traceback.print_exc() # Print full stack trace for unexpected errors
@@ -333,24 +321,23 @@ def classify_waste(image_bytes, use_test_model=False):
         # Check for specific Gemini API feedback if the 'response' object exists
         if response and hasattr(response, 'prompt_feedback'):
              try:
-                 # Accessing prompt_feedback might raise an error itself if generation failed early
-                 error_details += f". Prompt Feedback: {response.prompt_feedback}"
+                  # Accessing prompt_feedback might raise an error itself if generation failed early
+                  error_details += f". Prompt Feedback: {response.prompt_feedback}"
              except Exception as fb_e:
-                 print(f"Could not access prompt_feedback: {fb_e}")
+                  print(f"Could not access prompt_feedback: {fb_e}")
         elif response and hasattr(response, 'error'): # Check if response itself indicates an error
              error_details += f". Response Error Field: {response.error}"
 
         print(f"API Error Details: {error_details}")
-        # Check if the error message itself indicates an unknown field or config issue
-        if "Unknown field for GenerationConfig" in str(e) or \
-           "got an unexpected keyword argument" in str(e) or \
-           "ThinkingConfig" in str(e): # Catch thinking config specific errors
-            return None, f"API Config Error: Check model compatibility or parameters like 'thinking_config'. {str(e)[:100]}"
+        # Check if the error message itself indicates an unknown field
+        if "Unknown field for GenerationConfig" in str(e) or "got an unexpected keyword argument" in str(e):
+             return None, f"API Config Error: Check parameters like 'thinking_budget'. {str(e)[:100]}"
         else:
-            return None, f"Error: AI communication failed. {str(e)[:100]}"
+             return None, f"Error: AI communication failed. {str(e)[:100]}"
 
 
 # --- Flask Routes ---
+# ... (Routes remain the same as previous version) ...
 @app.route('/')
 def index():
     print("Serving index.html for root route /")
@@ -376,14 +363,14 @@ def process_frame():
             return jsonify({"error": "Missing image_data", "status": "Client error: No image data received."}), 400
 
         image_data_url = data['image_data']
-        use_test_model_flag = data.get('use_test_model', False) # Get the flag from the request
+        use_test_model_flag = data.get('use_test_model', False)
         print(f"Received process_frame request. use_test_model={use_test_model_flag}")
 
         # --- Decode Image ---
         try:
             header, encoded = image_data_url.split(",", 1)
             image_bytes = base64.b64decode(encoded)
-            mime_type = 'image/jpeg' # Default assumption
+            mime_type = 'image/jpeg'
             if ':' in header and ';' in header:
                  mime_part = header.split(':')[1].split(';')[0]
                  if '/' in mime_part: mime_type = mime_part
@@ -394,7 +381,6 @@ def process_frame():
 
         # --- Processing with selected model ---
         start_time = time.time()
-        # Pass the flag to the classification function
         bounding_boxes, status_message = classify_waste(image_bytes, use_test_model=use_test_model_flag)
         ai_time = time.time() - start_time
         print(f"Gemini classification took {ai_time:.2f} seconds. Status: {status_message}")
@@ -405,15 +391,10 @@ def process_frame():
         object_details_list = []
 
         if bounding_boxes is None:
-            # AI call failed critically
             print(f"classify_waste returned None. Status: {status_message}")
-            # Status message already contains the error from classify_waste
         elif not bounding_boxes:
-            # AI call succeeded but found no valid/parsable boxes
             print("classify_waste returned empty or invalid list. No objects detected/drawn.")
-            # Status message reflects this outcome
         else:
-            # AI call succeeded, found boxes, proceed to draw
             boxes_found = True
             start_draw_time = time.time()
             drawn_bytes = draw_bounding_boxes(image_bytes, bounding_boxes)
@@ -424,7 +405,6 @@ def process_frame():
             elif drawn_bytes is None:
                 print("Drawing boxes failed, returning original image.")
                 status_message += " (Error drawing boxes)"
-            # Extract details even if drawing fails, as boxes were detected
             object_details_list = [
                  {"name": box.object_name, "classification": box.label}
                  for box in bounding_boxes
@@ -438,7 +418,7 @@ def process_frame():
             "status": status_message,
             "processed_image_data": result_image_data_url,
             "boxes_found": boxes_found,
-            "object_details": object_details_list # Send details regardless of drawing success
+            "object_details": object_details_list
         })
 
     except Exception as e:
@@ -449,6 +429,4 @@ def process_frame():
 
 # --- Run ---
 if __name__ == '__main__':
-    # Use debug=True for development, False for production (like Render)
-    # Render sets the PORT environment variable automatically
     app.run(debug=False, host='0.0.0.0', port=int(os.environ.get("PORT", 5000)))
