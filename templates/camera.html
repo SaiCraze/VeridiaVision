@@ -3,451 +3,704 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Veridia Vision - Smart Waste Detection System">
-    <title>Veridia Vision - Smart Detection</title>
+    <title>Veridia Vision - Camera</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>♻️</text></svg>">
 
-    <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZDVYQL279E"></script>
     <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-ZDVYQL279E');
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-ZDVYQL279E');
     </script>
 
-    <!-- Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@400;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
-    
-    <!-- Custom Styles -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-</head>
-<body class="app-body">
-    <!-- Start Modal -->
-    <div id="startModal" class="modal modal-visible">
-        <div class="modal-content start-modal-content">
-            <h2>Ready to Scan?</h2>
-            <p>Click the button below to start the camera and begin waste classification.</p>
-            <button id="force-start-button" class="cta-button">Start Detection</button>
-        </div>
-    </div>
 
-    <!-- Main App Container -->
-    <div id="camera-app-container">
-        <!-- Header -->
-        <header id="app-header">
-            <div class="logo-container">
-                <span class="logo-icon">
-                    <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M13 2C10.4288 2 7.9154 2.76244 5.77759 4.1909C3.63978 5.61935 1.97351 7.64968 0.991826 10.0251C0.0101517 12.4006 -0.252401 15.0144 0.250707 17.5362C0.753815 20.058" fill="currentColor"/>
-                    </svg>
-                </span>
-                <a href="{{ url_for('index') }}" class="logo-text">Veridia Vision</a>
-            </div>
-            
-            <div class="controls-header">
-                <div class="control-group">
-                    <span class="material-symbols-rounded">volume_up</span>
-                    <label for="tts-toggle">Voice</label>
-                    <label class="switch">
-                        <input type="checkbox" id="tts-toggle" checked>
-                        <span class="slider round"></span>
-                    </label>
-                </div>
-                <div class="control-group">
-                    <span class="material-symbols-rounded">cameraswitch</span>
-                    <label for="camera-select">Camera</label>
-                    <select id="camera-select" class="camera-dropdown">
-                        <option>Loading...</option>
-                    </select>
-                </div>
-            </div>
-            
-            <button id="home-button" class="app-button" title="Return to Home">
-                <span class="material-symbols-rounded">home</span>
-                <span>Home</span>
-            </button>
-        </header>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0" rel="stylesheet">
 
-        <!-- Main Content -->
-        <main id="main-content">
-            <div id="camera-view-wrapper">
-                <!-- Video Feed -->
-                <div id="camera-container" class="media-container">
-                    <video id="video-feed" autoplay playsinline muted></video>
-                    
-                    <!-- Processing Overlay -->
-                    <div id="processing-overlay" class="overlay hidden">
-                        <div class="spinner"></div>
-                        <span>Analyzing...</span>
-                    </div>
-                    
-                    <!-- Error Overlay -->
-                    <div id="error-overlay" class="overlay error-msg hidden">
-                        <span class="material-symbols-rounded">error</span>
-                        <span id="error-text">Error accessing camera.</span>
-                    </div>
-                </div>
+    <style>
+        /* --- Base & Variables --- */
+        :root {
+            --bg-dark: #0f111a;
+            --bg-card: #1a1d29;
+            --primary-green: #00DC82;
+            --primary-dark-green: #003c1a;
+            --primary-light-green: #4eff9b;
+            --subtle-gray: #2c2f3b;
+            --text-light: #e1e4f0;
+            --text-gray: #a0a6b8;
+            --text-dark: #010101;
 
-                <!-- Result Image Container -->
-                <div id="result-image-container" class="media-container hidden">
-                    <img id="result-image" alt="Classification Result">
-                </div>
-            </div>
+            --font-primary: 'Poppins', sans-serif;
+            --font-heading: 'Space Grotesk', sans-serif;
+            --font-body: 'Poppins', sans-serif;
+            --font-interface: 'Montserrat', sans-serif;
 
-            <!-- Prediction Sidebar -->
-            <aside id="prediction-sidebar">
-                <div class="sidebar-header">
-                    <span class="material-symbols-rounded">insights</span>
-                    <h2>Detection Results</h2>
-                </div>
-                <div id="prediction-content" class="sidebar-content">
-                    <p class="placeholder-text">Initializing...</p>
-                </div>
-                <div class="sidebar-footer">
-                    <button id="stop-detection-button" class="action-button stop-button hidden">
-                        <span class="material-symbols-rounded">stop_circle</span>
-                        <span>Stop & Exit</span>
-                    </button>
-                </div>
-            </aside>
-        </main>
-    </div>
+            --space-xs: 8px;
+            --space-sm: 16px;
+            --space-md: 24px;
+            --space-lg: 32px;
+            --space-xl: 48px;
+            --space-xxl: 64px;
+            --border-radius-sm: 6px;
+            --border-radius-md: 10px;
+            --border-radius-lg: 16px;
+            --container-width: 1200px;
+            --header-height: 70px;
 
-    <!-- Hidden Canvas -->
-    <canvas id="canvas" style="display: none;"></canvas>
+            /* Single set of cursor variables for the body */
+            --cursor-x: 50vw; /* Use viewport units for fixed positioning */
+            --cursor-y: 50vh;
+        }
 
-    <!-- Main Application Script -->
-    <script>
-        // Camera App Class
-        class CameraApp {
-            constructor() {
-                this.initializeElements();
-                this.initializeState();
-                this.setupEventListeners();
-            }
+        /* Basic Reset */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { font-size: 100%; scroll-behavior: smooth; }
+        body {
+            font-family: var(--font-primary);
+            color: var(--text-light);
+            background-color: var(--bg-dark);
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            display: flex; /* Use flexbox for layout */
+            flex-direction: column;
+        }
 
-            // Initialize DOM Elements
-            initializeElements() {
-                this.video = document.getElementById('video-feed');
-                this.canvas = document.getElementById('canvas');
-                this.context = this.canvas.getContext('2d');
-                this.cameraContainer = document.getElementById('camera-container');
-                this.resultContainer = document.getElementById('result-image-container');
-                this.resultImage = document.getElementById('result-image');
-                this.predictionContent = document.getElementById('prediction-content');
-                this.startModal = document.getElementById('startModal');
-                this.startButton = document.getElementById('force-start-button');
-                this.stopButton = document.getElementById('stop-detection-button');
-                this.homeButton = document.getElementById('home-button');
-                this.ttsToggle = document.getElementById('tts-toggle');
-                this.cameraSelect = document.getElementById('camera-select');
-                this.processingOverlay = document.getElementById('processing-overlay');
-                this.errorOverlay = document.getElementById('error-overlay');
-                this.errorText = document.getElementById('error-text');
-            }
+         /* --- Cursor Following Light (Applied to Body) --- */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle 500px at var(--cursor-x) var(--cursor-y), rgba(0, 220, 130, 0.12), transparent 70%);
+            z-index: 0;
+            pointer-events: none;
+            transition: background 0.1s linear;
+        }
 
-            // Initialize State
-            initializeState() {
-                this.stream = null;
-                this.captureInterval = null;
-                this.resultTimeout = null;
-                this.isProcessing = false;
-                this.ttsEnabled = true;
-                this.currentDeviceId = null;
-                this.availableCameras = [];
-                
-                // Constants
-                this.CAPTURE_INTERVAL = 7000; // 7 seconds
-                this.RESULT_DISPLAY_TIME = 3000; // 3 seconds
-                this.synth = window.speechSynthesis;
-                this.voices = [];
-            }
+        /* --- Navigation --- */
+        .main-nav {
+            background-color: rgba(15, 17, 26, 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            position: fixed;
+            top: 0; left: 0; width: 100%;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            transition: background-color 0.3s ease;
+        }
 
-            // Setup Event Listeners
-            setupEventListeners() {
-                // Start Detection
-                this.startButton.addEventListener('click', () => this.handleStart());
-                
-                // Stop Detection
-                this.stopButton.addEventListener('click', () => this.stopAndExit());
-                
-                // Home Button
-                this.homeButton.addEventListener('click', () => this.stopAndExit());
-                
-                // Camera Selection
-                this.cameraSelect.addEventListener('change', () => this.handleCameraChange());
-                
-                // TTS Toggle
-                this.ttsToggle.addEventListener('change', () => {
-                    this.ttsEnabled = this.ttsToggle.checked;
-                    if (this.ttsEnabled) this.speak("Voice feedback enabled");
-                });
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: var(--header-height);
+            width: 100%;
+            max-width: var(--container-width);
+            margin: 0 auto;
+            padding: 0 var(--space-md);
+        }
 
-                // Page Visibility
-                document.addEventListener('visibilitychange', () => {
-                    if (document.hidden && this.stream) {
-                        this.pauseDetection();
-                    } else if (!document.hidden && this.captureInterval) {
-                        this.resumeDetection();
-                    }
-                });
+        .logo-container { display: flex; align-items: center; gap: var(--space-xs); }
+        .logo-text {
+            color: var(--primary-green);
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: 1.5rem;
+            text-decoration: none;
+            letter-spacing: -0.5px;
+        }
 
-                // Clean up on page unload
-                window.addEventListener('beforeunload', () => this.cleanup());
-            }
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: var(--space-sm);
+            margin-left: auto; /* Pushes nav links to the right */
+        }
 
-            // Initialize Voice
-            async initializeVoices() {
-                if (!this.synth) return;
-                
-                const loadVoices = () => {
-                    this.voices = this.synth.getVoices().filter(voice => voice.lang.startsWith('en'));
-                };
+        .nav-link {
+            color: var(--text-gray);
+            background-color: rgba(255, 255, 255, 0.05);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            font-family: var(--font-interface);
+            padding: 8px 16px;
+            border-radius: var(--border-radius-sm);
+            border: 1px solid transparent;
+            transition: all 0.25s ease;
+            position: relative; /* Needed for ripple */
+            white-space: nowrap;
+            overflow: hidden; /* Contain ripple */
+            z-index: 1; /* Ensure ripple is above background */
+        }
+        .nav-link::after { display: none; } /* Hide potential pseudo-elements */
+        .nav-link:hover {
+            color: var(--primary-green);
+            background-color: rgba(0, 220, 130, 0.1);
+            border-color: rgba(0, 220, 130, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 3px 10px rgba(0, 220, 130, 0.1);
+        }
+        .nav-link:active { transform: translateY(0px); box-shadow: none; }
 
-                if (this.synth.addEventListener) {
-                    this.synth.addEventListener('voiceschanged', loadVoices);
-                }
+        /* --- Ripple Effect Styles --- */
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.4); /* Ripple color */
+            transform: scale(0);
+            animation: ripple-animation 0.6s linear;
+            pointer-events: none; /* Don't interfere with clicks */
+        }
 
-                loadVoices();
-                
-                // Fallback for browsers that don't fire voiceschanged
-                if (this.voices.length === 0) {
-                    await new Promise(resolve => setTimeout(resolve, 1000));
-                    loadVoices();
-                }
-            }
-
-            // Camera Methods
-            async getCameraDevices() {
-                try {
-                    const devices = await navigator.mediaDevices.enumerateDevices();
-                    this.availableCameras = devices.filter(device => device.kind === 'videoinput');
-
-                    if (this.availableCameras.length === 0) {
-                        throw new Error('No cameras found');
-                    }
-
-                    // Populate camera select
-                    this.cameraSelect.innerHTML = '';
-                    this.availableCameras.forEach((camera, index) => {
-                        const option = document.createElement('option');
-                        option.value = camera.deviceId;
-                        option.text = camera.label || `Camera ${index + 1}`;
-                        this.cameraSelect.appendChild(option);
-                    });
-
-                    // Try to select back camera
-                    const backCamera = this.availableCameras.find(camera => 
-                        camera.label.toLowerCase().includes('back') || 
-                        camera.label.toLowerCase().includes('environment')
-                    );
-
-                    this.currentDeviceId = backCamera ? backCamera.deviceId : this.availableCameras[0].deviceId;
-                    this.cameraSelect.value = this.currentDeviceId;
-                    this.cameraSelect.disabled = false;
-
-                    return true;
-                } catch (error) {
-                    this.showError('Failed to enumerate cameras: ' + error.message);
-                    return false;
-                }
-            }
-
-            async startCamera() {
-                if (this.stream) {
-                    this.stream.getTracks().forEach(track => track.stop());
-                }
-
-                const constraints = {
-                    video: {
-                        deviceId: this.currentDeviceId ? { exact: this.currentDeviceId } : undefined,
-                        facingMode: this.currentDeviceId ? undefined : 'environment',
-                        width: { ideal: 1280 },
-                        height: { ideal: 720 }
-                    },
-                    audio: false
-                };
-
-                try {
-                    this.stream = await navigator.mediaDevices.getUserMedia(constraints);
-                    this.video.srcObject = this.stream;
-                    await this.video.play();
-                    
-                    // Set canvas size to match video
-                    this.canvas.width = this.video.videoWidth;
-                    this.canvas.height = this.video.videoHeight;
-                    
-                    this.cameraContainer.classList.remove('hidden');
-                    this.resultContainer.classList.add('hidden');
-                    return true;
-                } catch (error) {
-                    this.showError('Camera access error: ' + error.message);
-                    return false;
-                }
-            }
-
-            // Detection Methods
-            async startDetection() {
-                if (!await this.startCamera()) return false;
-                
-                this.stopButton.classList.remove('hidden');
-                this.startModal.classList.remove('modal-visible');
-                
-                // Initial capture
-                await this.captureAndProcess();
-                
-                // Set up interval for subsequent captures
-                this.captureInterval = setInterval(() => this.captureAndProcess(), this.CAPTURE_INTERVAL);
-                return true;
-            }
-
-            async captureAndProcess() {
-                if (this.isProcessing || document.hidden) return;
-                
-                this.isProcessing = true;
-                this.showProcessing(true);
-
-                try {
-                    // Capture frame
-                    this.context.drawImage(this.video, 0, 0, this.canvas.width, this.canvas.height);
-                    const imageData = this.canvas.toDataURL('image/jpeg', 0.8);
-
-                    // Process with backend
-                    const response = await fetch('/process_frame', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ image_data: imageData })
-                    });
-
-                    if (!response.ok) throw new Error('Server error');
-                    
-                    const result = await response.json();
-                    
-                    // Update UI with results
-                    this.resultImage.src = result.processed_image_data;
-                    this.updatePredictionContent(result);
-                    if (result.status) this.speak(result.status);
-
-                    // Show result briefly
-                    this.cameraContainer.classList.add('hidden');
-                    this.resultContainer.classList.remove('hidden');
-                    
-                    this.resultTimeout = setTimeout(() => {
-                        this.resultContainer.classList.add('hidden');
-                        this.cameraContainer.classList.remove('hidden');
-                    }, this.RESULT_DISPLAY_TIME);
-
-                } catch (error) {
-                    this.showError('Processing error: ' + error.message);
-                } finally {
-                    this.isProcessing = false;
-                    this.showProcessing(false);
-                }
-            }
-
-            // UI Methods
-            showProcessing(show) {
-                this.processingOverlay.classList.toggle('hidden', !show);
-            }
-
-            showError(message) {
-                this.errorText.textContent = message;
-                this.errorOverlay.classList.remove('hidden');
-                setTimeout(() => this.errorOverlay.classList.add('hidden'), 5000);
-                console.error(message);
-            }
-
-            updatePredictionContent(result) {
-                if (result.error) {
-                    this.predictionContent.innerHTML = `<p class="error-text">${result.error}</p>`;
-                    return;
-                }
-
-                if (!result.boxes_found || !Array.isArray(result.object_details) || result.object_details.length === 0) {
-                    this.predictionContent.innerHTML = '<p class="placeholder-text">No objects detected</p>';
-                    return;
-                }
-
-                const html = result.object_details.map(detail => `
-                    <div class="prediction-item ${detail.classification.toLowerCase()}">
-                        <span class="object-name">${detail.name || 'Unknown'}</span>
-                        <span class="classification">${detail.classification || 'Unclassified'}</span>
-                    </div>
-                `).join('');
-
-                this.predictionContent.innerHTML = `<div class="prediction-list">${html}</div>`;
-            }
-
-            // Voice Feedback
-            speak(text) {
-                if (!this.ttsEnabled || !this.synth || !text) return;
-                
-                if (this.synth.speaking) this.synth.cancel();
-                
-                const utterance = new SpeechSynthesisUtterance(text);
-                if (this.voices.length > 0) {
-                    utterance.voice = this.voices.find(v => v.name.includes('Google')) || this.voices[0];
-                }
-                utterance.rate = 1.1;
-                utterance.pitch = 1;
-                this.synth.speak(utterance);
-            }
-
-            // Control Methods
-            async handleStart() {
-                if (this.captureInterval) return;
-                await this.startDetection();
-            }
-
-            async handleCameraChange() {
-                const newDeviceId = this.cameraSelect.value;
-                if (newDeviceId === this.currentDeviceId) return;
-                
-                this.currentDeviceId = newDeviceId;
-                if (this.captureInterval) {
-                    await this.stopDetection();
-                    await this.startDetection();
-                }
-            }
-
-            stopAndExit() {
-                this.cleanup();
-                window.location.href = "{{ url_for('index') }}";
-            }
-
-            cleanup() {
-                clearInterval(this.captureInterval);
-                clearTimeout(this.resultTimeout);
-                
-                if (this.stream) {
-                    this.stream.getTracks().forEach(track => track.stop());
-                    this.stream = null;
-                }
-                
-                if (this.synth && this.synth.speaking) {
-                    this.synth.cancel();
-                }
-            }
-
-            pauseDetection() {
-                clearInterval(this.captureInterval);
-                this.captureInterval = null;
-            }
-
-            resumeDetection() {
-                if (!this.stream) return;
-                this.captureInterval = setInterval(() => this.captureAndProcess(), this.CAPTURE_INTERVAL);
+        @keyframes ripple-animation {
+            to {
+                transform: scale(4);
+                opacity: 0;
             }
         }
 
-        // Initialize the app
-        document.addEventListener('DOMContentLoaded', () => {
-            const app = new CameraApp();
+
+        /* --- Camera Page Layout --- */
+        .camera-container {
+            display: flex;
+            flex-grow: 1; /* Allow container to take up remaining space */
+            padding-top: var(--header-height); /* Offset for fixed header */
+            padding-bottom: var(--space-md);
+            padding-left: var(--space-md);
+            padding-right: var(--space-md);
+            max-width: var(--container-width);
+            width: 100%;
+            margin: 0 auto;
+            gap: var(--space-md);
+            position: relative;
+            z-index: 1;
+        }
+
+        .video-section {
+            flex-grow: 1; /* Video section takes available space */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: var(--bg-card);
+            border-radius: var(--border-radius-lg);
+            padding: var(--space-md);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden; /* Hide overflow from video */
+        }
+
+        #cameraFeed {
+            width: 100%;
+            height: auto; /* Maintain aspect ratio */
+            max-height: 70vh; /* Limit height */
+            border-radius: var(--border-radius-md);
+            background-color: var(--subtle-gray); /* Placeholder background */
+            object-fit: contain; /* Ensure video fits within bounds */
+        }
+
+        .controls {
+            display: flex;
+            gap: var(--space-md);
+            margin-top: var(--space-md);
+            flex-wrap: wrap; /* Allow controls to wrap */
+            justify-content: center;
+            width: 100%;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+            background-color: rgba(255, 255, 255, 0.05);
+            padding: var(--space-xs) var(--space-sm);
+            border-radius: var(--border-radius-sm);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .control-group label {
+             font-family: var(--font-interface);
+             font-size: 0.9rem;
+             color: var(--text-light);
+        }
+
+        .control-group select,
+        .control-group button {
+             font-family: var(--font-interface);
+             font-size: 0.9rem;
+             padding: 6px 12px;
+             border-radius: var(--border-radius-sm);
+             border: 1px solid var(--subtle-gray);
+             background-color: var(--subtle-gray);
+             color: var(--text-light);
+             cursor: pointer;
+             transition: all 0.2s ease;
+        }
+
+         .control-group select:focus,
+         .control-group button:focus {
+             outline: none;
+             border-color: var(--primary-green);
+             box-shadow: 0 0 0 2px rgba(0, 220, 130, 0.3);
+         }
+
+        .control-group button:hover {
+             background-color: var(--primary-green);
+             color: var(--primary-dark-green);
+        }
+
+        /* Toggle Switch Styles */
+        .switch {
+          position: relative;
+          display: inline-block;
+          width: 40px;
+          height: 24px;
+        }
+
+        .switch input {
+          opacity: 0;
+          width: 0;
+          height: 0;
+        }
+
+        .slider {
+          position: absolute;
+          cursor: pointer;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-color: var(--subtle-gray);
+          transition: .4s;
+          border-radius: 24px;
+        }
+
+        .slider:before {
+          position: absolute;
+          content: "";
+          height: 16px;
+          width: 16px;
+          left: 4px;
+          bottom: 4px;
+          background-color: white;
+          transition: .4s;
+          border-radius: 50%;
+        }
+
+        input:checked + .slider {
+          background-color: var(--primary-green);
+        }
+
+        input:focus + .slider {
+          box-shadow: 0 0 1px var(--primary-green);
+        }
+
+        input:checked + .slider:before {
+          transform: translateX(16px);
+        }
+
+
+        .results-sidebar {
+            width: 300px; /* Fixed width for sidebar */
+            background-color: var(--bg-card);
+            border-radius: var(--border-radius-lg);
+            padding: var(--space-md);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+            overflow-y: auto; /* Add scroll if content overflows */
+            max-height: calc(100vh - var(--header-height) - var(--space-md) * 2); /* Adjust max height */
+        }
+
+        .results-sidebar h3 {
+            font-family: var(--font-heading);
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: var(--space-sm);
+            color: var(--text-light);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: var(--space-xs);
+        }
+
+        .result-item {
+            background-color: var(--subtle-gray);
+            border-radius: var(--border-radius-sm);
+            padding: var(--space-sm);
+            font-size: 0.95rem;
+            color: var(--text-light);
+            border-left: 4px solid var(--primary-green);
+        }
+
+        .result-item strong {
+            color: var(--primary-light-green);
+            margin-right: var(--space-xs);
+        }
+
+        .result-item p {
+            margin-bottom: var(--space-xs);
+        }
+
+        .result-item p:last-child {
+            margin-bottom: 0;
+        }
+
+        .loading-message {
+            text-align: center;
+            color: var(--text-gray);
+            font-style: italic;
+        }
+
+         /* --- Footer --- */
+        .main-footer {
+             background-color: var(--bg-dark);
+             padding: var(--space-lg) 0;
+             border-top: 1px solid rgba(255, 255, 255, 0.05);
+             text-align: center;
+             position: relative;
+             z-index: 1;
+        }
+        .main-footer p { color: var(--text-gray); font-size: 0.95rem; }
+
+
+        /* --- Media Queries --- */
+        @media (max-width: 992px) {
+             .nav-links { gap: var(--space-xs); }
+             .nav-link { padding: 6px 12px; font-size: 0.85rem;}
+             .camera-container { flex-direction: column; }
+             .results-sidebar { width: 100%; max-height: 300px; } /* Adjust sidebar for smaller screens */
+        }
+
+        @media (max-width: 768px) {
+            .nav-links { display: none; } /* Hide nav links on smaller screens */
+            .video-section { padding: var(--space-sm); }
+            .results-sidebar { padding: var(--space-sm); }
+            .controls { flex-direction: column; align-items: center;}
+            .control-group { width: 80%; justify-content: center;}
+        }
+
+         /* Accessibility: Reduce motion */
+        @media (prefers-reduced-motion: reduce) {
+          *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+          .ripple { display: none; } /* Disable ripple */
+        }
+
+    </style>
+</head>
+<body>
+    <nav class="main-nav">
+        <div class="nav-container">
+            <div class="logo-container">
+                <span class="logo-icon">
+                    <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M13 2C10.4288 2 7.9154 2.76244 5.77759 4.1909C3.63978 5.61935 1.97351 7.64968 0.991826 10.0251C0.0101517 12.4006 -0.252401 15.0144 0.250707 17.5362C0.753815 20.0579 1.98979 22.3743 3.80762 24.1921C5.62545 26.01 7.94189 27.2459 10.4636 27.749C12.9854 28.2521 15.5992 27.9895 17.9747 27.0078C20.3502 26.0262 22.3805 24.3599 23.809 22.2221C25.2374 20.0843 25.9999 17.5709 25.9999 14.9997C25.9999 11.4869 24.5777 8.10073 22.0498 5.57285C19.5219 3.04497 16.1357 1.62275 12.6229 1.62275L13 2Z" fill="#00DC82"/>
+                        <path d="M16.6183 7.72656C16.9121 7.72656 17.193 7.84102 17.4018 8.04988C17.6107 8.25873 17.7251 8.53962 17.7251 8.83344V11.0472C18.8078 11.2852 19.787 11.8768 20.5051 12.7328C21.2232 13.5888 21.6341 14.6612 21.6736 15.78C21.713 16.8988 21.3786 18.0004 20.7207 18.9107C20.0627 19.8211 19.1207 20.487 18.0566 20.7978C16.9924 21.1086 15.8558 21.0442 14.8335 20.6148C13.8113 20.1855 12.9638 19.4167 12.4369 18.4371C11.91 17.4575 11.7326 16.327 11.9343 15.2329C12.136 14.1388 12.7051 13.1462 13.5487 12.4145C13.6158 12.3533 13.6971 12.3086 13.7861 12.2848C13.875 12.2611 13.9686 12.2591 14.0584 12.279C14.1482 12.2989 14.2313 12.3401 14.3007 12.3985C14.3701 12.4569 14.4237 12.5307 14.4565 12.6135C14.4893 12.6963 14.5 12.7853 14.488 12.8724C14.4759 12.9594 14.4415 13.0416 14.3878 13.1116C14.334 13.1815 14.2627 13.2371 14.1801 13.2731C14.0975 13.3091 14.0064 13.3245 13.9164 13.318C13.1855 13.897 12.6909 14.7381 12.543 15.6746C12.3951 16.6111 12.6049 17.5705 13.1318 18.3577C13.6586 19.1449 14.4653 19.7056 15.3871 19.9356C16.3089 20.1656 17.2845 20.0478 18.1183 19.6051C18.9521 19.1624 19.5871 18.4291 19.9105 17.5407C20.2339 16.6523 20.2211 15.6743 19.8745 14.7947C19.5279 13.9151 18.8731 13.1981 18.0282 12.7764C17.1834 12.3546 16.2069 12.2588 15.2943 12.5082V15.1671C15.2943 15.4609 15.1798 15.7418 14.971 15.9507C14.7621 16.1595 14.4812 16.274 14.1874 16.274C13.8936 16.274 13.6127 16.1595 13.4038 15.9507C13.195 15.7418 13.0805 15.4609 13.0805 15.1671V8.83344C13.0805 8.53962 13.195 8.25873 13.4038 8.04988C13.6127 7.84102 13.8936 7.72656 14.1874 7.72656H16.6183Z" fill="#003c1a"/>
+                    </svg>
+                </span>
+                <a href="/" class="logo-text">Veridia Vision</a>
+            </div>
+            <ul class="nav-links">
+                <li><a href="/#features" class="nav-link ripple-effect">Features</a></li>
+                <li><a href="/#testimonials" class="nav-link ripple-effect">Testimonials</a></li>
+                <li><a href="/changelog" class="nav-link ripple-effect">Changelog</a></li>
+                <li><a href="/#contact" class="nav-link ripple-effect">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="camera-container">
+        <div class="video-section">
+            <video id="cameraFeed" autoplay playsinline></video>
+            <canvas id="hiddenCanvas" style="display: none;"></canvas> <div class="controls">
+                <div class="control-group">
+                    <label for="cameraSelect">Switch Camera:</label>
+                    <select id="cameraSelect"></select>
+                </div>
+                <div class="control-group">
+                    <label for="voiceToggle">Voice Output:</label>
+                     <label class="switch">
+                        <input type="checkbox" id="voiceToggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+             <p id="statusMessage" class="loading-message">Loading camera feed...</p>
+        </div>
+        <div class="results-sidebar" id="resultsSidebar">
+            <h3>Detection Results</h3>
+            <p class="loading-message">Awaiting first detection...</p>
+        </div>
+    </main>
+
+    <footer class="main-footer">
+        <div class="section-container">
+            <p>© 2025 Veridia Vision. Pioneering AI for a Sustainable Future.</p>
+        </div>
+    </footer>
+
+    <script>
+        // --- Cursor Following Light (Applied to Body) ---
+        const bodyElement = document.body;
+        bodyElement.addEventListener('mousemove', (e) => {
+            const x = e.clientX;
+            const y = e.clientY;
+            bodyElement.style.setProperty('--cursor-x', `${x}px`);
+            bodyElement.style.setProperty('--cursor-y', `${y}px`);
         });
+        bodyElement.addEventListener('mouseleave', () => {
+            bodyElement.style.setProperty('--cursor-x', `50vw`);
+            bodyElement.style.setProperty('--cursor-y', `50vh`);
+        });
+
+        // --- Ripple Click Effect ---
+        function createRipple(event) {
+            const button = event.currentTarget; // Get the element that was clicked
+
+            // Create span element for the ripple
+            const ripple = document.createElement("span");
+            const rect = button.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = event.clientX - rect.left - size / 2;
+            const y = event.clientY - rect.top - size / 2;
+
+            // Add ripple class and styles
+            ripple.style.width = ripple.style.height = `${size}px`;
+            ripple.style.left = `${x}px`;
+            ripple.style.top = `${y}px`;
+            ripple.classList.add("ripple");
+
+            // Append ripple, handle removal
+            const existingRipple = button.querySelector(".ripple");
+            if (existingRipple) {
+                existingRipple.remove();
+            }
+            button.appendChild(ripple);
+
+            // Remove ripple after animation ends
+            ripple.addEventListener('animationend', () => {
+                ripple.remove();
+            });
+        }
+
+        // Add event listeners to elements with the 'ripple-effect' class
+        const rippleElements = document.querySelectorAll(".ripple-effect, .nav-link"); // Apply to nav links too
+        rippleElements.forEach(element => {
+            element.addEventListener("click", createRipple);
+        });
+
+
+        // --- Camera and Detection Logic ---
+        const video = document.getElementById('cameraFeed');
+        const cameraSelect = document.getElementById('cameraSelect');
+        const voiceToggle = document.getElementById('voiceToggle');
+        const resultsSidebar = document.getElementById('resultsSidebar');
+        const statusMessage = document.getElementById('statusMessage');
+        const hiddenCanvas = document.getElementById('hiddenCanvas');
+        const hiddenCanvasCtx = hiddenCanvas.getContext('2d');
+
+        let currentStream;
+        let detectionInterval;
+        let isProcessing = false; // Flag to prevent multiple requests
+
+        // Function to get available cameras and populate the select dropdown
+        async function getCameras() {
+            try {
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const videoDevices = devices.filter(device => device.kind === 'videoinput');
+
+                cameraSelect.innerHTML = ''; // Clear previous options
+
+                if (videoDevices.length === 0) {
+                    statusMessage.textContent = 'No camera devices found.';
+                    return;
+                }
+
+                videoDevices.forEach(device => {
+                    const option = document.createElement('option');
+                    option.value = device.deviceId;
+                    option.text = device.label || `Camera ${cameraSelect.options.length + 1}`;
+                    cameraSelect.appendChild(option);
+                });
+
+                // Start video with the first camera by default
+                startCamera(videoDevices[0].deviceId);
+
+            } catch (error) {
+                console.error('Error enumerating devices:', error);
+                statusMessage.textContent = `Error accessing cameras: ${error.message}`;
+            }
+        }
+
+        // Function to start the camera feed
+        async function startCamera(deviceId) {
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+            }
+
+            const constraints = {
+                video: {
+                    deviceId: deviceId ? { exact: deviceId } : undefined
+                }
+            };
+
+            try {
+                statusMessage.textContent = 'Starting camera feed...';
+                currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+                video.srcObject = currentStream;
+
+                video.onloadedmetadata = () => {
+                    video.play();
+                    statusMessage.textContent = 'Camera feed active.';
+                    // Start sending frames for detection after video starts playing
+                    startDetection();
+                };
+
+            } catch (error) {
+                console.error('Error accessing camera:', error);
+                statusMessage.textContent = `Error starting camera: ${error.message}`;
+                 // Clear any ongoing detection interval on error
+                stopDetection();
+            }
+        }
+
+        // Function to capture a frame and send for detection
+        function captureFrameAndDetect() {
+            if (isProcessing || video.readyState !== video.HAVE_ENOUGH_DATA) {
+                // Don't capture if already processing or video is not ready
+                return;
+            }
+
+            isProcessing = true; // Set processing flag
+
+            // Set canvas dimensions to match video feed
+            hiddenCanvas.width = video.videoWidth;
+            hiddenCanvas.height = video.videoHeight;
+
+            // Draw the current video frame onto the canvas
+            hiddenCanvasCtx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+
+            // Get the image data as a base64 string
+            const imageDataUrl = hiddenCanvas.toDataURL('image/jpeg'); // Use JPEG for smaller size
+
+            // Send the image data to the Flask backend
+            sendForDetection(imageDataUrl);
+        }
+
+        // Function to send image data to the backend
+        async function sendForDetection(imageDataUrl) {
+            // Clear previous results and show loading
+            resultsSidebar.innerHTML = '<h3>Detection Results</h3><p class="loading-message">Analyzing frame...</p>';
+
+
+            try {
+                const response = await fetch('/process_frame', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ image: imageDataUrl }),
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const results = await response.json();
+                displayResults(results);
+
+            } catch (error) {
+                console.error('Error sending frame for detection:', error);
+                resultsSidebar.innerHTML = '<h3>Detection Results</h3><p class="loading-message" style="color: red;">Error during detection.</p>';
+            } finally {
+                isProcessing = false; // Reset processing flag
+            }
+        }
+
+        // Function to display results in the sidebar and speak them
+        function displayResults(results) {
+            resultsSidebar.innerHTML = '<h3>Detection Results</h3>'; // Clear previous results
+
+            if (results && results.length > 0) {
+                results.forEach(item => {
+                    const resultDiv = document.createElement('div');
+                    resultDiv.classList.add('result-item');
+                    resultDiv.innerHTML = `
+                        <p><strong>Object:</strong> ${item.object_name}</p>
+                        <p><strong>General Classification:</strong> ${item.general_classification}</p>
+                        <p><strong>Waterloo Classification:</strong> ${item.waterloo_classification}</p>
+                    `;
+                    resultsSidebar.appendChild(resultDiv);
+
+                    // Speak the result if voice is enabled
+                    if (voiceToggle.checked) {
+                        speakResult(item);
+                    }
+                });
+            } else {
+                resultsSidebar.innerHTML = '<h3>Detection Results</h3><p class="loading-message">No objects detected.</p>';
+            }
+        }
+
+        // Function to speak the detection result
+        function speakResult(item) {
+            const textToSpeak = `Detected: ${item.object_name}. General classification: ${item.general_classification}. Waterloo Region classification: ${item.waterloo_classification}.`;
+            const utterance = new SpeechSynthesisUtterance(textToSpeak);
+            utterance.lang = 'en-US'; // Set language
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // Function to start the detection interval
+        function startDetection() {
+            // Stop any existing interval first
+            stopDetection();
+            // Capture a frame every 4000ms (4 seconds) - Adjusted interval here
+            detectionInterval = setInterval(captureFrameAndDetect, 4000);
+        }
+
+        // Function to stop the detection interval
+        function stopDetection() {
+            if (detectionInterval) {
+                clearInterval(detectionInterval);
+                detectionInterval = null;
+            }
+        }
+
+
+        // Event listeners
+        cameraSelect.addEventListener('change', (event) => {
+            startCamera(event.target.value);
+        });
+
+        // Initial setup
+        window.onload = () => {
+            getCameras();
+            // Ensure voice toggle is off by default
+            voiceToggle.checked = false;
+        };
+
+         // Stop camera and detection when leaving the page
+        window.addEventListener('beforeunload', () => {
+            stopDetection();
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+            }
+             // Cancel any ongoing speech
+             if (window.speechSynthesis.speaking) {
+                window.speechSynthesis.cancel();
+            }
+        });
+
+         // Add event listeners to elements with the 'ripple-effect' class (for nav links)
+        const navRippleElements = document.querySelectorAll(".nav-link");
+        navRippleElements.forEach(element => {
+            element.addEventListener("click", createRipple);
+        });
+
+
     </script>
 </body>
 </html>
