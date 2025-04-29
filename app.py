@@ -22,7 +22,10 @@ if not api_key:
 genai.configure(api_key=api_key)
 
 # Model Names
-MODEL_DEFAULT = "gemini-2.0-flash"
+# <<< MODIFIED: Changed default model >>>
+# Using gemini-1.5-flash-latest as the likely intended "lite" model.
+# Replace with "gemini-2.0-flash-lite" if that specific ID is available to you.
+MODEL_DEFAULT = "gemini-1.5-flash-latest"
 # Ensure you use the correct, available model ID for the test model
 MODEL_TEST = "models/gemini-2.5-flash-preview-0417" # Example - Use the actual ID from Google AI Studio/Vertex AI docs
 
@@ -47,20 +50,20 @@ def draw_bounding_boxes(image_bytes, bounding_boxes):
         if bounding_boxes: # Check if list is not None or empty
              for box_data in bounding_boxes:
                  if isinstance(box_data, BoundingBox):
-                     labels.add(box_data.label)
-                     valid_box_objects.append(box_data)
+                      labels.add(box_data.label)
+                      valid_box_objects.append(box_data)
                  elif isinstance(box_data, dict): # Handle raw dict if validation failed
-                     try:
-                         # Attempt to create a BoundingBox for consistent access
-                         box_obj = BoundingBox(**box_data)
-                         labels.add(box_obj.label)
-                         valid_box_objects.append(box_obj)
-                     except ValidationError:
-                         print(f"Skipping drawing invalid box data: {box_data}")
-                         continue # Skip drawing this box
+                      try:
+                          # Attempt to create a BoundingBox for consistent access
+                          box_obj = BoundingBox(**box_data)
+                          labels.add(box_obj.label)
+                          valid_box_objects.append(box_obj)
+                      except ValidationError:
+                          print(f"Skipping drawing invalid box data: {box_data}")
+                          continue # Skip drawing this box
                  else:
-                     print(f"Skipping drawing unrecognized box data type: {type(box_data)}")
-                     continue # Skip drawing this box
+                      print(f"Skipping drawing unrecognized box data type: {type(box_data)}")
+                      continue # Skip drawing this box
 
         if not valid_box_objects:
              print("No valid boxes to draw.")
@@ -194,11 +197,17 @@ def classify_waste(image_bytes, use_test_model=False):
 
         # --- Initialize Model and Prepare Request ---
         # Ensure the model name includes the 'models/' prefix if required by the SDK version
-        if not model_name.startswith('models/'):
-             client_model_name = f'models/{model_name}'
+        # Models available directly via genai (like gemini-1.5-flash-latest) often don't need it,
+        # while specific tuned or preview models (like MODEL_TEST) usually do.
+        # The SDK might handle this, but explicit check can prevent errors.
+        if '/' not in model_name: # Basic check if it looks like a direct ID vs. a path
+            client_model_name = model_name # Assume direct ID like 'gemini-1.5-flash-latest'
+        elif not model_name.startswith('models/'):
+             client_model_name = f'models/{model_name}' # Add prefix if needed
         else:
-             client_model_name = model_name
-        client = genai.GenerativeModel(model_name=client_model_name) # Pass full model ID
+             client_model_name = model_name # Already has prefix
+        print(f"Initializing client with model name: {client_model_name}")
+        client = genai.GenerativeModel(model_name=client_model_name)
 
         image_part = {"mime_type": "image/jpeg", "data": image_bytes} # Assuming JPEG input
         # System prompt remains the same
@@ -245,16 +254,16 @@ def classify_waste(image_bytes, use_test_model=False):
              cleaned_response_text = cleaned_response_text[:-len("```")].strip()
 
         if not cleaned_response_text:
-            print("Gemini returned an empty response after stripping.")
-            return [], "No classifiable objects detected (empty AI response)."
+             print("Gemini returned an empty response after stripping.")
+             return [], "No classifiable objects detected (empty AI response)."
 
         # --- Parse and Validate JSON ---
         response_json = json.loads(cleaned_response_text)
 
         if not isinstance(response_json, list):
-            print(f"Validation Error: Expected a list, got {type(response_json)}")
-            # Try to return the raw JSON if it's not a list but might be useful
-            return None, f"Error: AI response was not a list ({type(response_json).__name__})."
+             print(f"Validation Error: Expected a list, got {type(response_json)}")
+             # Try to return the raw JSON if it's not a list but might be useful
+             return None, f"Error: AI response was not a list ({type(response_json).__name__})."
 
 
         # --- Validate individual items using Pydantic ---
@@ -296,8 +305,8 @@ def classify_waste(image_bytes, use_test_model=False):
             counts = {}
             object_names = []
             for box in validated_boxes:
-                counts[box.label] = counts.get(box.label, 0) + 1
-                object_names.append(box.object_name)
+                 counts[box.label] = counts.get(box.label, 0) + 1
+                 object_names.append(box.object_name)
 
             status_parts = [f"{count} {label}" for label, count in counts.items()]
             object_list = ", ".join(object_names)
@@ -337,7 +346,6 @@ def classify_waste(image_bytes, use_test_model=False):
 
 
 # --- Flask Routes ---
-# ... (Routes remain the same as previous version) ...
 @app.route('/')
 def index():
     print("Serving index.html for root route /")
@@ -401,10 +409,10 @@ def process_frame():
             draw_time = time.time() - start_draw_time
             print(f"Drawing boxes took {draw_time:.2f} seconds.")
             if drawn_bytes is not None and drawn_bytes != image_bytes:
-                processed_image_bytes = drawn_bytes
+                 processed_image_bytes = drawn_bytes
             elif drawn_bytes is None:
-                print("Drawing boxes failed, returning original image.")
-                status_message += " (Error drawing boxes)"
+                 print("Drawing boxes failed, returning original image.")
+                 status_message += " (Error drawing boxes)"
             object_details_list = [
                  {"name": box.object_name, "classification": box.label}
                  for box in bounding_boxes
@@ -429,4 +437,9 @@ def process_frame():
 
 # --- Run ---
 if __name__ == '__main__':
-    app.run(debug=False, host='0.0.0.0', port=int(os.environ.get("PORT", 5000)))
+    # Use Gunicorn or another production server in production instead of debug=True
+    # For Render/Heroku/etc., they often set the PORT environment variable.
+    port = int(os.environ.get("PORT", 5000))
+    # Set debug=False for production environments
+    # host='0.0.0.0' makes it accessible on the network
+    app.run(debug=False, host='0.0.0.0', port=port)
