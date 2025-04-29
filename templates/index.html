@@ -53,6 +53,8 @@
             /* Single set of cursor variables for the body */
             --cursor-x: 50vw; /* Use viewport units for fixed positioning */
             --cursor-y: 50vh;
+            /* Parallax variable */
+            --parallax-offset: 0px;
         }
 
         /* Basic Reset */
@@ -65,19 +67,18 @@
             line-height: 1.6;
             min-height: 100vh;
             overflow-x: hidden;
-            position: relative; /* Needed for pseudo-elements if they use absolute */
+            position: relative;
         }
 
         /* --- Cursor Following Light (Applied to Body) --- */
         body::after {
             content: '';
-            position: fixed; /* Fixed position relative to viewport */
+            position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            /* Gradient centered at cursor variables */
-            background: radial-gradient(circle 500px at var(--cursor-x) var(--cursor-y), rgba(0, 220, 130, 0.12), transparent 70%); /* Greenish light */
-            z-index: 0; /* Position behind all content */
-            pointer-events: none; /* Allow clicks through */
-            transition: background 0.1s linear; /* Smooth movement */
+            background: radial-gradient(circle 500px at var(--cursor-x) var(--cursor-y), rgba(0, 220, 130, 0.12), transparent 70%);
+            z-index: 0;
+            pointer-events: none;
+            transition: background 0.1s linear;
         }
 
 
@@ -88,7 +89,7 @@
             -webkit-backdrop-filter: blur(10px);
             position: fixed;
             top: 0; left: 0; width: 100%;
-            z-index: 1000; /* Ensure nav is above body light */
+            z-index: 1000;
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             transition: background-color 0.3s ease;
         }
@@ -132,8 +133,10 @@
             border-radius: var(--border-radius-sm);
             border: 1px solid transparent;
             transition: all 0.25s ease;
-            position: relative;
+            position: relative; /* Needed for ripple */
             white-space: nowrap;
+            overflow: hidden; /* Contain ripple */
+            z-index: 1; /* Ensure ripple is above background */
         }
         .nav-link::after { display: none; }
         .nav-link:hover {
@@ -148,14 +151,13 @@
 
         /* --- Hero Section --- */
         .hero-container {
-            position: relative; /* Still needed for ::before */
+            position: relative;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
             padding: var(--header-height) var(--space-md) 0;
-            /* Background color is now handled by body */
         }
         .hero-container::before { /* Animated Gradient (Specific to Hero) */
             content: '';
@@ -167,16 +169,18 @@
                         radial-gradient(circle at 10% 90%, #2193b0aa 0%, transparent 45%);
             background-size: 150% 150%;
             animation: moveGradient 25s ease infinite alternate;
-            z-index: 1; /* Above body light, below hero content */
+            z-index: 1;
             filter: blur(50px);
+            /* Apply parallax transform using CSS variable */
+            transform: translateY(var(--parallax-offset, 0px));
+            will-change: transform;
         }
         @keyframes moveGradient { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-        /* REMOVED .hero-container::after (Cursor Light) */
 
         /* Hero Content Container (Glassmorphism) */
         .hero-content-wrapper {
             position: relative;
-            z-index: 2; /* Above hero gradient and body light */
+            z-index: 2;
             padding: var(--space-xl) var(--space-lg);
             background-color: rgba(26, 29, 41, 0.5);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -237,6 +241,9 @@
             display: inline-block;
             letter-spacing: 0.3px;
             box-shadow: 0 4px 15px rgba(0, 220, 130, 0.1);
+            position: relative; /* Needed for ripple */
+            overflow: hidden; /* Contain ripple */
+            z-index: 1; /* Ensure ripple is above background */
         }
         .cta-button:hover {
             background-color: var(--primary-light-green);
@@ -244,11 +251,29 @@
             box-shadow: 0 6px 20px rgba(0, 220, 130, 0.3);
         }
 
+        /* --- Ripple Effect Styles --- */
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.4); /* Ripple color */
+            transform: scale(0);
+            animation: ripple-animation 0.6s linear;
+            pointer-events: none; /* Don't interfere with clicks */
+        }
+
+        @keyframes ripple-animation {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+
         /* --- General Section Styling --- */
         .content-section {
              padding: var(--space-xxl) 0;
-             position: relative; /* Ensure content is above body light */
-             z-index: 1; /* Sit above body light */
+             position: relative;
+             z-index: 1;
              overflow: hidden;
         }
         .section-container { width: 100%; max-width: var(--container-width); margin: 0 auto; padding: 0 var(--space-md); }
@@ -266,10 +291,10 @@
         .scroll-animate.visible { opacity: 1; transform: translateY(0); }
 
         /* --- Features Section --- */
-        .features-section { background-color: transparent; } /* Remove specific background */
+        .features-section { background-color: transparent; }
         .feature-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-lg); margin-top: var(--space-lg); }
         .feature-card {
-            background-color: var(--bg-card); /* Keep card background */
+            background-color: var(--bg-card);
             border-radius: var(--border-radius-lg);
             padding: var(--space-lg);
             box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
@@ -277,7 +302,7 @@
             display: flex; flex-direction: column; align-items: center; text-align: center;
             border: 1px solid rgba(255, 255, 255, 0.05);
             transition-delay: calc(0.1s * var(--card-index, 0));
-            position: relative; /* Ensure content is above body light */
+            position: relative;
              z-index: 1;
         }
         .feature-card:hover { transform: translateY(-8px) scale(1.02); box-shadow: 0 10px 25px rgba(0, 220, 130, 0.15); border-color: rgba(0, 220, 130, 0.5); }
@@ -290,30 +315,19 @@
         .feature-card p { color: var(--text-gray); font-size: 1rem; line-height: 1.7; }
 
         /* --- Testimonials Section --- */
-        .testimonials-section { background-color: var(--bg-card); } /* Keep card background */
-        .testimonial-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--space-lg); margin-top: var(--space-lg); }
-        .testimonial-card {
-            background-color: var(--bg-dark); border-radius: var(--border-radius-md); padding: var(--space-lg);
-            border: 1px solid rgba(255, 255, 255, 0.05); position: relative;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            transition-delay: calc(0.1s * var(--card-index, 0));
-             z-index: 1; /* Above body light */
-             min-height: 180px; /* Give empty cards some height */
+        .testimonials-section { background-color: var(--bg-card); }
+        .testimonial-cards {
+            margin-top: var(--space-lg);
+            padding-bottom: var(--space-lg);
         }
-        .testimonial-card:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25); }
-        .testimonial-card::before { content: '“'; position: absolute; top: var(--space-md); left: var(--space-md); font-size: 4rem; color: var(--primary-green); opacity: 0.15; font-family: serif; line-height: 1; }
-        .testimonial-text { font-style: italic; color: var(--text-gray); margin-bottom: var(--space-md); position: relative; z-index: 1; font-size: 1.05rem; min-height: 3em; /* Reserve space for text */ }
-        .testimonial-author { font-weight: 600; color: var(--text-light); margin-top: var(--space-sm); text-align: right; min-height: 2.5em; /* Reserve space for author */ }
-        .testimonial-author span { display: block; font-weight: 400; font-size: 0.9rem; color: var(--primary-green); opacity: 0.8; }
 
         /* --- Contact Section --- */
         .contact-section {
-            background-color: transparent; /* Remove specific background */
+            background-color: transparent;
             position: relative;
-            overflow: hidden; /* Contain elements */
-             z-index: 1; /* Sit above body light */
+            overflow: hidden;
+             z-index: 1;
         }
-        /* REMOVED .contact-section::after (Cursor Light) */
 
         .contact-description {
             text-align: center;
@@ -336,7 +350,6 @@
         }
 
         .contact-card {
-            /* Keep Glassmorphism */
             background-color: rgba(26, 29, 41, 0.55);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
@@ -351,7 +364,7 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
-             z-index: 1; /* Above body light */
+             z-index: 1;
         }
 
         .contact-card:hover {
@@ -393,29 +406,17 @@
              padding: var(--space-lg) 0;
              border-top: 1px solid rgba(255, 255, 255, 0.05);
              text-align: center;
-             position: relative; /* Ensure footer is above body light */
+             position: relative;
              z-index: 1;
         }
         .main-footer p { color: var(--text-gray); font-size: 0.95rem; }
 
-        /* --- Modal Styles --- */
-        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0, 0, 0, 0.8); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); animation: fadeInModal 0.3s ease-out; align-items: center; justify-content: center; }
-        .modal-content {
-            background-color: var(--bg-card); padding: var(--space-lg); border: 1px solid var(--primary-green); border-radius: var(--border-radius-md);
-            width: 90%; max-width: 500px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); position: relative;
-            animation: slideInModal 0.4s ease-out; color: var(--text-light);
-             z-index: 2001; /* Ensure modal content is above everything */
-        }
-        @keyframes fadeInModal { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideInModal { from { transform: translateY(-30px) scale(0.95); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
-        .modal-content h2 { font-family: var(--font-heading); color: var(--primary-green); margin-bottom: var(--space-md); text-align: center; font-size: 1.8rem; letter-spacing: -0.5px; }
-        .modal-content p { margin-bottom: var(--space-sm); line-height: 1.7; text-align: center; }
-        .modal-content ul { list-style-position: inside; padding-left: var(--space-sm); margin-bottom: var(--space-lg); text-align: left; }
-        .modal-content li { margin-bottom: var(--space-xs); color: var(--text-gray); }
-        .close-button { color: var(--text-gray); position: absolute; top: 15px; right: 20px; font-size: 28px; font-weight: bold; cursor: pointer; transition: color 0.2s ease, transform 0.2s ease; }
-        .close-button:hover, .close-button:focus { color: var(--primary-green); transform: scale(1.1); text-decoration: none; }
-        #proceed-button.cta-button { display: block; margin: var(--space-md) auto 0; width: fit-content; }
-
+        /* --- Modal Styles REMOVED --- */
+        /*
+        .modal { ... }
+        .modal-content { ... }
+        ... etc ...
+        */
 
         /* --- Media Queries --- */
         @media (max-width: 992px) {
@@ -446,6 +447,8 @@
         @media (prefers-reduced-motion: reduce) {
           *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
           .scroll-animate { opacity: 1; transform: none; }
+          .ripple { display: none; } /* Disable ripple */
+          .hero-container::before { animation: none; } /* Stop gradient animation */
         }
 
     </style>
@@ -463,9 +466,9 @@
                 <a href="#" class="logo-text">Veridia Vision</a>
             </div>
             <ul class="nav-links">
-                <li><a href="#features" class="nav-link">Features</a></li>
-                <li><a href="#testimonials" class="nav-link">Testimonials</a></li>
-                <li><a href="/changelog" class="nav-link">Changelog</a></li> <li><a href="#contact" class="nav-link">Contact</a></li>
+                <li><a href="#features" class="nav-link ripple-effect">Features</a></li>
+                <li><a href="#testimonials" class="nav-link ripple-effect">Testimonials</a></li>
+                <li><a href="/changelog" class="nav-link ripple-effect">Changelog</a></li> <li><a href="#contact" class="nav-link ripple-effect">Contact</a></li>
             </ul>
             </div>
     </nav>
@@ -475,7 +478,7 @@
             <h1>Smart Recycling,<br>Reimagined with AI</h1>
             <p class="hero-description">Veridia Vision uses cutting-edge AI to analyze live camera feeds, providing real-time waste classification for a greener future.</p>
             <div class="hero-buttons">
-                <button id="start-detection-button" class="cta-button">
+                <button id="start-detection-button" class="cta-button ripple-effect">
                     Start Detection
                 </button>
                 </div>
@@ -509,12 +512,7 @@
         <div class="section-container">
             <h2 class="section-title scroll-animate">What People Say</h2>
             <div class="testimonial-cards">
-                <div class="testimonial-card scroll-animate" style="--card-index: 1;">
-                    <p class="testimonial-text"></p> <p class="testimonial-author"><span></span></p> </div>
-                <div class="testimonial-card scroll-animate" style="--card-index: 2;">
-                     <p class="testimonial-text"></p> <p class="testimonial-author"><span></span></p> </div>
-                <div class="testimonial-card scroll-animate" style="--card-index: 3;">
-                     <p class="testimonial-text"></p> <p class="testimonial-author"><span></span></p> </div>
+                 <p class="scroll-animate" style="text-align: center; color: var(--text-gray); margin-top: var(--space-md);">Testimonials coming soon!</p>
             </div>
         </div>
     </section>
@@ -544,35 +542,15 @@
         </div>
     </footer>
 
-    <div id="instructionModal" class="modal">
-      <div class="modal-content">
-        <span class="close-button">×</span>
-        <h2>Before You Start</h2>
-        <p>Quick guide to using Veridia Vision:</p>
-        <ul>
-            <li>Ensure good lighting for accurate detection.</li>
-            <li>Hold the camera steady over waste items.</li>
-            <li>Results appear instantly on the right panel.</li>
-            <li>Use top controls for voice & camera selection.</li>
-        </ul>
-        <button id="proceed-button" class="cta-button">Proceed to Camera</button>
-      </div>
-    </div>
-
     <script>
         // --- Cursor Following Light (Applied to Body) ---
         const bodyElement = document.body;
-
         bodyElement.addEventListener('mousemove', (e) => {
-            // Use clientX/Y for fixed positioning relative to viewport
             const x = e.clientX;
             const y = e.clientY;
-            // Update CSS variables on the body
             bodyElement.style.setProperty('--cursor-x', `${x}px`);
             bodyElement.style.setProperty('--cursor-y', `${y}px`);
         });
-
-        // Optional: Reset light position when mouse leaves the window
         bodyElement.addEventListener('mouseleave', () => {
             bodyElement.style.setProperty('--cursor-x', `50vw`);
             bodyElement.style.setProperty('--cursor-y', `50vh`);
@@ -589,24 +567,76 @@
         }, { threshold: 0.1 });
         animatedElements.forEach(el => { observer.observe(el); });
 
-        // --- Modal Logic ---
-        const modal = document.getElementById("instructionModal");
+        // --- Direct Link Logic for Start Button ---
         const startBtn = document.getElementById("start-detection-button");
-        const span = document.querySelector("#instructionModal .close-button");
-        const proceedBtn = document.getElementById("proceed-button");
 
-        if (modal && startBtn && span && proceedBtn) {
-            startBtn.onclick = function() { modal.style.display = "flex"; }
-            span.onclick = function() { modal.style.display = "none"; }
-            proceedBtn.onclick = function() { window.location.href = "/camera"; } // Adjust route if needed
-            window.onclick = function(event) { if (event.target == modal) { modal.style.display = "none"; } }
+        if (startBtn) {
+            startBtn.onclick = function() {
+                // Directly navigate to the camera page
+                window.location.href = "/camera"; // Ensure this route is correct
+            }
         } else {
-            console.warn("Modal elements or Start Detection button not found correctly.");
-            if (!modal) console.warn("Modal container missing");
-            if (!startBtn) console.warn("Start Detection button in hero missing");
-            if (!span) console.warn("Modal close button missing");
-            if (!proceedBtn) console.warn("Modal proceed button missing");
+            console.warn("Start Detection button not found.");
         }
+
+        // --- Ripple Click Effect ---
+        function createRipple(event) {
+            const button = event.currentTarget; // Get the element that was clicked
+
+            // Create span element for the ripple
+            const ripple = document.createElement("span");
+            const rect = button.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = event.clientX - rect.left - size / 2;
+            const y = event.clientY - rect.top - size / 2;
+
+            // Add ripple class and styles
+            ripple.style.width = ripple.style.height = `${size}px`;
+            ripple.style.left = `${x}px`;
+            ripple.style.top = `${y}px`;
+            ripple.classList.add("ripple");
+
+            // Append ripple, handle removal
+            const existingRipple = button.querySelector(".ripple");
+            if (existingRipple) {
+                existingRipple.remove();
+            }
+            button.appendChild(ripple);
+
+            // Remove ripple after animation ends
+            ripple.addEventListener('animationend', () => {
+                ripple.remove();
+            });
+        }
+
+        // Add event listeners to elements with the 'ripple-effect' class
+        // Note: The modal proceed button is removed, so no need to select it here
+        const rippleElements = document.querySelectorAll(".ripple-effect, .nav-link"); // Apply to nav links too
+        rippleElements.forEach(element => {
+            element.addEventListener("click", createRipple);
+        });
+
+
+        // --- Parallax Scroll Effect for Hero Background ---
+        const heroBg = document.querySelector('.hero-container::before'); // Target the pseudo-element
+        const heroContainer = document.querySelector('.hero-container');
+
+        // Check if elements exist before adding listener
+        if (heroContainer) {
+            window.addEventListener('scroll', () => {
+                // Only run parallax if not prefers-reduced-motion
+                if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+                    const scrollPosition = window.pageYOffset;
+                    const parallaxOffset = scrollPosition * 0.4;
+                    // Set the CSS variable for the transform
+                    heroContainer.style.setProperty('--parallax-offset', `${parallaxOffset}px`);
+                } else {
+                     // Reset offset if motion is reduced
+                     heroContainer.style.setProperty('--parallax-offset', `0px`);
+                }
+            });
+        }
+
     </script>
 </body>
 </html>
